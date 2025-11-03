@@ -46,7 +46,7 @@
   --color-primary: #282656;
   --color-secondary: #EDF6FD;
   --color-primary-light: #525080;
-  --color-accent: #484AB3;
+  --color-accent-ui: #484AB3;
   --color-text-light: #C2BED5;
   --color-text: #F6F2FF;
   --color-text-dark: #352D60;
@@ -58,7 +58,10 @@
   --color-deny-outline: #735454;
   --color-neutral: #967F74;
   --color-neutral-outline: #736554;
-  --selected: linear-gradient(to left, var(--color-primary-light), #1F1F5A);
+}
+
+.bg-selected {
+  background-image: linear-gradient(to left, var(--color-primary-light), #1F1F5A);
 }
 
 :root {
