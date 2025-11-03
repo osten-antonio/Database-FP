@@ -15,5 +15,5 @@ export function SidebarButton({Icon,label,route,pathname}){
             </button>
         </li>
     )
-
 }
+
