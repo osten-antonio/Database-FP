@@ -3,17 +3,12 @@ import { useState, useEffect } from "react"
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
 import api from '@/lib/axios'
-
-
-
 
 export function RecentOrders(){
     // TODO on click, redirect to order, prefilled with search using id
@@ -21,16 +16,15 @@ export function RecentOrders(){
 
     useEffect(() => {
         async function fetchOrders() {
-        try {
-            const res = await api.get("/orders");
-            if (res.status >= 200 && res.status <= 300) {
-            setOrders(res.data.slice(0,5));
+            try {
+                const res = await api.get("/orders");
+                if (res.status >= 200 && res.status <= 300) {
+                    setOrders(res.data.slice(0,5));
+                }
+            } catch (err) {
+                console.error(err);
             }
-        } catch (err) {
-            console.error(err);
         }
-        }
-
         fetchOrders();
         const interval = setInterval(fetchOrders, 10000); 
         return () => clearInterval(interval);
@@ -41,26 +35,19 @@ export function RecentOrders(){
             <div className="overflow-hidden rounded-lg border-0 mt-5">
             <Table>
                 <TableHeader className='my-2 bg-primary'>
-                    <TableHead className='text-text-light'>Action</TableHead>
-                    <TableHead className='text-text-light'>Order ID</TableHead>
-                    <TableHead className='text-text-light'>Customer</TableHead>
-                    <TableHead className='text-text-light'>Item</TableHead>
-                    <TableHead className='text-text-light'>Amount</TableHead>
-                    <TableHead className='text-text-light'>Cost</TableHead>
-                    <TableHead className='text-text-light'>Date ordered</TableHead>
-                    <TableHead className='text-text-light'>Delivery date</TableHead>
-                    <TableHead className='text-text-light'>Status</TableHead>
-                    <TableHead className='text-text-light'>Warehouse</TableHead>
+                    <TableHead className='text-text-light font-bold'>Order ID</TableHead>
+                    <TableHead className='text-text-light font-bold'>Customer</TableHead>
+                    <TableHead className='text-text-light font-bold'>Item</TableHead>
+                    <TableHead className='text-text-light font-bold'>Amount</TableHead>
+                    <TableHead className='text-text-light font-bold'>Cost</TableHead>
+                    <TableHead className='text-text-light font-bold'>Date ordered</TableHead>
+                    <TableHead className='text-text-light font-bold'>Delivery date</TableHead>
+                    <TableHead className='text-text-light font-bold'>Status</TableHead>
+                    <TableHead className='text-text-light font-bold'>Warehouse</TableHead>
                 </TableHeader>
                 <TableBody className='bg-accent-dark'>
                     {orders.map((order,index) => (
                         <TableRow className='border-accent-dark' key={index}>
-                            <TableCell 
-                                className="text-text-dark relative 
-                                after:content-[''] after:absolute after:right-2 
-                                after:top-2 after:bottom-2 
-                                after:w-px after:bg-primary
-                            ">Action</TableCell>
                             <TableCell 
                                 className="text-text-dark relative
                                 after:content-[''] after:absolute after:right-2 

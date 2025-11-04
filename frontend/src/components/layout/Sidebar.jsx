@@ -15,10 +15,10 @@ export function Sidebar({isOpen}){
             <ul className=''>
                 <SidebarButton Icon={LayoutDashboard} label='Dashboard' route='/' pathname={pathname} />
                 <SidebarButton Icon={NotebookText} label='Orders' route='/order' pathname={pathname} />
-                <SidebarButton Icon={PackageSearch} label='Products' route='/order' pathname={pathname} />
-                <SidebarButton Icon={Warehouse} label='Warehouses' route='/order' pathname={pathname} />
-                <SidebarButton Icon={HandPlatter} label='Suppliers' route='/order' pathname={pathname} />
-                <SidebarButton Icon={Users} label='Customers' route='/order' pathname={pathname} />
+                <SidebarButton Icon={PackageSearch} label='Products' route='/product' pathname={pathname} />
+                <SidebarButton Icon={Warehouse} label='Warehouses' route='/warehouse' pathname={pathname} />
+                <SidebarButton Icon={HandPlatter} label='Suppliers' route='/supplier' pathname={pathname} />
+                <SidebarButton Icon={Users} label='Customers' route='/customer' pathname={pathname} />
             </ul>
         </div>
     )
