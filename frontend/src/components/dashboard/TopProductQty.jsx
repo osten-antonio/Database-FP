@@ -36,46 +36,52 @@ const chartConfig = {
 
 export function TopProductChartQty() {
   return (
-    <Card className='bg-primary h-full'>
-      <CardHeader>
+    <Card className='bg-primary-light shadow-md shadow-accent-dark border-primary-dark border-2 h-full'>
+      <CardHeader className='flex gap-2 lg:gap-4 border-b flex-col'>
         <CardTitle className='text-text'>Top products</CardTitle>
-        <CardDescription className='text-text-light'>Quantity sold</CardDescription>
+        <CardDescription className='text-text-light text-xs'>Quantity sold</CardDescription>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig}>
-          <BarChart
-            accessibilityLayer
-            data={chartData}
-            layout="vertical"
-            margin={{
-              left: -20,
-            }}
-          >
-            <XAxis type="number" dataKey="Quantity" hide />
-            <YAxis
-              dataKey="product"
-              type="category"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-              tickFormatter={(value) => value.slice(0, 11)}
-              tick={{ fill: "#F6F2FF", style: { fill: "#F6F2FF" } }}
-            />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Bar dataKey="Quantity" fill="var(--color-Quantity)" radius={5}>
-              <LabelList
-                dataKey="Quantity"
-                position="right"
-                offset={8}
-                className="fill-text-light"
-                fontSize={12}
+      <CardContent className='flex items-center h-full'>
+        <div className="w-full">
+          <ChartContainer config={chartConfig}>
+            <BarChart
+              accessibilityLayer
+              data={chartData}
+              layout="vertical"
+              margin={{
+                left: -20,
+              }}
+            >
+              <XAxis type="number" dataKey="Quantity" hide />
+              <YAxis
+                dataKey="product"
+                type="category"
+                tickLine={false}
+                tickMargin={0}
+                axisLine={false}
+                width={80}
+                tickFormatter={(value) => {
+                  return value.length > 15 ? value.slice(0, 12) + '...' : value
+                }
+              }
+                tick={{ fill: "#F6F2FF", style: { fill: "#F6F2FF" } }}
               />
-            </Bar>
-          </BarChart>
-        </ChartContainer>
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent hideLabel />}
+              />
+              <Bar dataKey="Quantity" fill="var(--color-Quantity)" radius={5}>
+                <LabelList
+                  dataKey="Quantity"
+                  position="insideLeft"
+                  offset={8}
+                  className="fill-text-dark"
+                  fontSize={12}
+                />
+              </Bar>
+            </BarChart>
+          </ChartContainer>
+        </div>
       </CardContent>
     </Card>
   )

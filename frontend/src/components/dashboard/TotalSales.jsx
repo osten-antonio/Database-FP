@@ -71,7 +71,7 @@ export function TotalSales() {
   const [month, setMonth] = useState("month")
 
   return (
-    <Card className="pt-0 bg-primary h-full">
+    <Card className="pt-0 bg-primary-light shadow-md shadow-accent-dark border-primary-dark border-2 h-full">
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
         <div className="grid flex-1 gap-1">
           <CardTitle className='text-text'>Total Sales in {month}</CardTitle>
@@ -90,10 +90,10 @@ export function TotalSales() {
           </SelectContent>
         </Select>
       </CardHeader>
-      <CardContent className="px-2 sm:px-6 sm:pt-6">
+      <CardContent className="px-2 sm:px-6 h-full">
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-[250px] w-full bg-secondary rounded-xl"
+          className="aspect-auto h-full w-full bg-secondary rounded-xl"
         >
           <AreaChart data={chartData}>
             <defs>

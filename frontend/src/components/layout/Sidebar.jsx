@@ -9,7 +9,7 @@ export function Sidebar({isOpen}){
     const pathname = usePathname();
     return (
         <div className={`
-            h-screen w-screen sm:w-fit bg-primary-dark flex text-text flex-col p-4
+            w-screen sm:w-fit bg-primary-dark flex text-text flex-col p-4
             ${isOpen ? 'block' : 'hidden'} lg:block
             `}>
             <ul className=''>
