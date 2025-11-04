@@ -13,7 +13,7 @@ export function LayoutWrapper({children}){
     return (
         <>
             <Header onMenuClick={onMenuClick}/>
-            <div className="flex">
+            <div className="flex h-full">
                 <Sidebar isOpen={open}/>
                 {children}
             </div>

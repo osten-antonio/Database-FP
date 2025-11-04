@@ -10,7 +10,7 @@ export function Sidebar({isOpen}){
     return (
         <div className={`
             w-screen sm:w-fit bg-primary-dark flex text-text flex-col p-4
-            ${isOpen ? 'block' : 'hidden'} lg:block
+            ${isOpen ? 'block' : 'hidden'} xl:block pt-20 fixed z-5 h-full
             `}>
             <ul className=''>
                 <SidebarButton Icon={LayoutDashboard} label='Dashboard' route='/' pathname={pathname} />

@@ -22,7 +22,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-secondary`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full bg-secondary `}
       >
         <LayoutWrapper children={children}/>
       </body>
