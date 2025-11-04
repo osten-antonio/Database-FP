@@ -58,11 +58,14 @@
   --color-deny-outline: #735454;
   --color-neutral: #967F74;
   --color-neutral-outline: #736554;
-  --color-card-bg: #EFE9FA;
 }
 
 .bg-selected {
   background-image: linear-gradient(to left, var(--color-primary-light), #1F1F5A);
+}
+
+.bg-card-grad{
+  background-image: linear-gradient(45deg, var(--color-primary-light), #7D7BA8);
 }
 
 :root {

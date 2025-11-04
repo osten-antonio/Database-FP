@@ -36,7 +36,7 @@ const chartConfig = {
 
 export function TopProductChartQty() {
   return (
-    <Card className='bg-primary-light shadow-md shadow-accent-dark border-primary-dark border-2 h-full'>
+    <Card className='bg-card-grad shadow-md shadow-accent-dark border-primary-dark border-2 h-full'>
       <CardHeader className='flex gap-2 lg:gap-4 border-b flex-col'>
         <CardTitle className='text-text'>Top products</CardTitle>
         <CardDescription className='text-text-light text-xs'>Quantity sold</CardDescription>
