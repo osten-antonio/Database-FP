@@ -37,8 +37,8 @@ export function TopProductChartRev() {
   return (
     <Card className='bg-card-grad shadow-md shadow-accent-dark border-primary-dark border-2 h-full'>
       <CardHeader className='flex gap-2 lg:gap-4 border-b flex-col'>
-        <CardTitle className='text-text'>Top products</CardTitle>
-        <CardDescription className='text-text-light text-xs'>Revenue made ($)</CardDescription>
+        <CardTitle className='text-text font-bold'>Top products</CardTitle>
+        <CardDescription className='text-text-light text-xs font-semibold'>Revenue made ($)</CardDescription>
       </CardHeader>
       <CardContent className='flex items-center h-full'>
         <div className="w-full">

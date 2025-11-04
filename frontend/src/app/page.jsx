@@ -26,7 +26,7 @@ export default function Home() {
           <div className='min-w-0 md:col-span-4'>
             <TopProductChartRev/>
           </div>
-          <Card className='min-w-0 md:col-span-3 bg-card-grad shadow-md shadow-accent- border-primary-dark border-2'>
+          <Card className='min-w-0 md:col-span-3 bg-card-grad shadow-md shadow-accent-dark border-primary-dark border-2'>
             <CardHeader>
               <CardDescription className='text-text text-xl font-bold'>Total Sales</CardDescription>
               <CardDescription className='text-xs text-text opacity-75 font-semibold'>Last 90 days</CardDescription>

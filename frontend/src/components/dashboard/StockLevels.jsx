@@ -39,7 +39,7 @@ export function StockLevels() {
   return (
     <Card className='bg-card-grad shadow-md shadow-accent-dark border-primary-dark border-2 h-full pt-0'>
       <CardHeader className='flex items-center border-b py-6 sm:flex-row'>
-        <CardTitle className='text-text py-2'>Warehouse stocks level</CardTitle>
+        <CardTitle className='text-text py-2 font-bold'>Warehouse stocks level</CardTitle>
       </CardHeader>
       <CardContent className="overflow-x-auto">
         <ChartContainer config={chartConfig} 

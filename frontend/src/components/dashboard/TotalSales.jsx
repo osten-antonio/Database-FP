@@ -74,7 +74,7 @@ export function TotalSales() {
     <Card className="pt-0 bg-card-grad shadow-md shadow-accent-dark border-primary-dark border-2 h-full">
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
         <div className="grid flex-1 gap-1">
-          <CardTitle className='text-text'>Total Sales in {month}</CardTitle>
+          <CardTitle className='text-text font-bold'>Total Sales in {month}</CardTitle>
         </div>
         <Select value={month} className='bg-secondary'>
           <SelectTrigger
