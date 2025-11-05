@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import { FilterWindow } from './filter';
 
 export default function Order() {
     const [orders,setOrders] = useState([]);
@@ -37,6 +38,8 @@ export default function Order() {
         pageIndex: 0,
         pageSize: 10,
     });
+    const [isFilter, setFilter] = useState(false);
+    const [filters, setFilters] = useState(undefined);
 
     const columns = [
         {
@@ -121,10 +124,17 @@ export default function Order() {
 
     return(
         <div className="p-6 w-screen xl:ml-auto xl:w-6/7 2xl:w-8/9 mt-12">
+            {
+                isFilter ?             
+                <FilterWindow setOpen={setFilter} filters={filters} setFilters={setFilters}/>
+                :
+                <></>
+            }
+
             <h1 className='text-text-dark text-3xl font-bold mb-4'>
                 Orders
             </h1>
-            <div className='flex flex-row flex-wrap justify-between gap-2'>
+            <div className='flex flex-row flex-wrap justify-between gap-2 w-full'>
                 <button className='bg-primary p-2 px-10 rounded-lg text-text-light font-semibold shadow-md shadow-accent-dark'>
                     Create
                 </button>
@@ -133,6 +143,7 @@ export default function Order() {
                         <input type='text' className='bg-primary-light h-full w-full rounded-md text-text-light px-2 shadow-md shadow-accent-dark' placeholder='Search'/>
                     </form>
                     <button 
+                        onClick={()=>{setFilter(true)}}
                         className='shadow-md shadow-accent-dark flex flex-nowrap gap-2 bg-primary p-2 px-5 rounded-lg text-text-light font-semibold'
                     >
                         <ListFilter/>
@@ -140,14 +151,14 @@ export default function Order() {
                     </button>
                 </div>
             </div>
-            <div className="overflow-hidden rounded-lg border-0 mt-5 shadow-md shadow-accent-dark">
+            <div className="overflow-hidden rounded-lg border-0 mt-5 shadow-md w-full shadow-accent-dark">
                 <Table>
                     <TableHeader className='my-2 bg-primary'>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
                                 return (
-                                    <TableHead className='text-text-light font-bold' key={header.id} colSpan={header.colSpan}>
+                                    <TableHead className='text-text-light font-medium' key={header.id} colSpan={header.colSpan}>
                                     {header.isPlaceholder
                                         ? null
                                         : flexRender(
@@ -169,7 +180,7 @@ export default function Order() {
                                 
                                 return (<TableCell
                                 key={cell.id}
-                                className={`text-text-dark relative 
+                                className={`text-text-dark relative font-semibold
                                     ${!isLast ? "after:content-[''] after:absolute after:right-2 after:top-2 after:bottom-2 after:w-px after:bg-primary" : ""}
                                     `}
                                 >
@@ -190,36 +201,37 @@ export default function Order() {
                         )}
                     </TableBody>
                 </Table>
-            <div className="flex w-full items-center gap-8 lg:w-fit">
-                {/* TODO style this */}
-                <div className="hidden items-center gap-2 lg:flex">
-                    <Label htmlFor="rows-per-page" className="text-sm font-medium">
-                        Rows per page
-                    </Label>
-                    <Select
-                        value={`${table.getState().pagination.pageSize}`}
-                        onValueChange={(value) => {
-                        table.setPageSize(Number(value))
-                        }}
-                    >
-                        <SelectTrigger size="sm" className="w-20" id="rows-per-page">
-                        <SelectValue
-                            placeholder={table.getState().pagination.pageSize}
-                        />
-                        </SelectTrigger>
-                        <SelectContent side="top">
-                        {[10, 20, 30, 40, 50].map((pageSize) => (
-                            <SelectItem key={pageSize} value={`${pageSize}`}>
-                            {pageSize}
-                            </SelectItem>
-                        ))}
-                        </SelectContent>
-                    </Select>
+            <div className="flex w-full items-center gap-8 bg-primary-light justify-between p-2">
+                <span className='flex flex-row flex-nowrap gap-8'>
+                    <div className="hidden items-center gap-2 lg:flex text-text">
+                        <Label htmlFor="rows-per-page" className="text-sm font-semibold">
+                            Rows per page
+                        </Label>
+                        <Select
+                            value={`${table.getState().pagination.pageSize}`}
+                            onValueChange={(value) => {
+                            table.setPageSize(Number(value))
+                            }}
+                        >
+                            <SelectTrigger size="sm" className="w-20" id="rows-per-page">
+                            <SelectValue
+                                placeholder={table.getState().pagination.pageSize}
+                            />
+                            </SelectTrigger>
+                            <SelectContent side="top">
+                            {[10, 20, 30, 40, 50].map((pageSize) => (
+                                <SelectItem key={pageSize} value={`${pageSize}`}>
+                                {pageSize}
+                                </SelectItem>
+                            ))}
+                            </SelectContent>
+                        </Select>
                     </div>
-                    <div className="flex w-fit items-center justify-center text-sm font-medium">
-                    Page {table.getState().pagination.pageIndex + 1} of{" "}
-                    {table.getPageCount()}
+                    <div className="flex w-fit items-center justify-center text-sm font-medium text-text">
+                        Page {table.getState().pagination.pageIndex + 1} of{" "}
+                        {table.getPageCount()}
                     </div>
+                </span>
                     <div className="ml-auto flex items-center gap-2 lg:ml-0">
                     <button
                         variant="outline"
@@ -228,7 +240,7 @@ export default function Order() {
                         disabled={!table.getCanPreviousPage()}
                     >
                         <span className="sr-only">Go to first page</span>
-                        <ChevronsLeft />
+                        <ChevronsLeft className='m-auto' color='#F6F2FF'/>
                     </button>
                     <button
                         variant="outline"
@@ -238,7 +250,7 @@ export default function Order() {
                         disabled={!table.getCanPreviousPage()}
                     >
                         <span className="sr-only">Go to previous page</span>
-                        <ChevronLeft />
+                        <ChevronLeft className='m-auto' color='#F6F2FF'/>
                     </button>
                     <button
                         variant="outline"
@@ -248,7 +260,7 @@ export default function Order() {
                         disabled={!table.getCanNextPage()}
                     >
                         <span className="sr-only">Go to next page</span>
-                        <ChevronRight />
+                        <ChevronRight className='m-auto' color='#F6F2FF'/>
                     </button>
                     <button
                         variant="outline"
@@ -258,7 +270,7 @@ export default function Order() {
                         disabled={!table.getCanNextPage()}
                     >
                         <span className="sr-only">Go to last page</span>
-                        <ChevronsRight />
+                        <ChevronsRight className='m-auto' color='#F6F2FF'/>
                     </button>
                 </div>
             </div>

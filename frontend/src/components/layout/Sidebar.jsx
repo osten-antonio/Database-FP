@@ -12,7 +12,7 @@ export function Sidebar({isOpen}){
             w-screen sm:w-fit bg-primary-dark flex text-text flex-col p-4
             transform transition-transform duration-300 ease-in-out 
             ${isOpen ? 'translate-x-0' : '-translate-x-full'} 
-            xl:block pt-20 fixed z-5 h-full
+            xl:block pt-20 fixed z-5 h-full xl:translate-x-0
             `}>
             <ul className=''>
                 <SidebarButton Icon={LayoutDashboard} label='Dashboard' route='/' pathname={pathname} />

@@ -316,7 +316,16 @@ def get_customer():
     ]
     return customers
 
-
+@app.get("/warehouses")
+def get_warehouses():
+    return [
+        { "warehouse_id": 1, "account_id": 101, "name": "Jakarta Central Warehouse", "address": "Jl. Gatot Subroto No.12, Jakarta Selatan, DKI Jakarta 12950" },
+        { "warehouse_id": 2, "account_id": 102, "name": "Bandung Distribution Hub", "address": "Jl. Asia Afrika No.34, Bandung, Jawa Barat 40111" },
+        { "warehouse_id": 3, "account_id": 103, "name": "Surabaya Main Warehouse", "address": "Jl. Ahmad Yani No.88, Surabaya, Jawa Timur 60231" },
+        { "warehouse_id": 4, "account_id": 104, "name": "Medan North Logistics", "address": "Jl. Gatot Subroto No.19, Medan, Sumatera Utara 20122" },
+        { "warehouse_id": 5, "account_id": 105, "name": "Denpasar Bali Storage", "address": "Jl. Sunset Road No.21, Kuta, Bali 80361" },
+        { "warehouse_id": 6, "account_id": 106, "name": "Yogyakarta Regional Hub", "address": "Jl. Malioboro No.56, Yogyakarta 55213" }
+    ]
 
 if __name__ == "__main__":
     uvicorn.run("sample_data:app", host="0.0.0.0", port=6767, reload=True)
