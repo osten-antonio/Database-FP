@@ -15,7 +15,7 @@ import {
 export default function Home() {
   return (
     // Note: I changed the bg to a lighter one because better contrast
-    <div className="p-6 w-screen xl:ml-auto xl:w-6/7 2xl:w-8/9 mt-12">
+    <div className="p-6 pl-10 w-screen xl:ml-auto xl:w-6/7 2xl:w-8/9 mt-12">
       <h1 className='text-text-dark text-3xl font-bold mb-4'>
         Dashboard
       </h1>

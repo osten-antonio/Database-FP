@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { FilterWindow } from './filter';
+import { CreateWindow } from './create';
 
 export default function Order() {
     const [orders,setOrders] = useState([]);
@@ -40,6 +41,7 @@ export default function Order() {
     });
     const [isFilter, setFilter] = useState(false);
     const [filters, setFilters] = useState(undefined);
+    const [isCreate, setCreate] = useState(false);
 
     const columns = [
         {
@@ -123,19 +125,18 @@ export default function Order() {
     },[])
 
     return(
-        <div className="p-6 w-screen xl:ml-auto xl:w-6/7 2xl:w-8/9 mt-12">
-            {
-                isFilter ?             
-                <FilterWindow setOpen={setFilter} filters={filters} setFilters={setFilters}/>
-                :
-                <></>
-            }
+        <div className="p-6 pl-10 w-screen xl:ml-auto xl:w-6/7 2xl:w-8/9 mt-12">          
+            <FilterWindow isOpen={isFilter} setOpen={setFilter} filters={filters} setFilters={setFilters}/>
+            <CreateWindow isOpen={isCreate} setOpen={setCreate}/>
 
             <h1 className='text-text-dark text-3xl font-bold mb-4'>
                 Orders
             </h1>
             <div className='flex flex-row flex-wrap justify-between gap-2 w-full'>
-                <button className='bg-primary p-2 px-10 rounded-lg text-text-light font-semibold shadow-md shadow-accent-dark'>
+                <button 
+                    onClick={()=>{setCreate(true)}}
+                    className='bg-primary p-2 px-10 rounded-lg text-text-light font-semibold shadow-md shadow-accent-dark'
+                >
                     Create
                 </button>
                 <div className='w-xl flex flex-row gap-2'>

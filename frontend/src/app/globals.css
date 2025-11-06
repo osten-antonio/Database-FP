@@ -61,7 +61,7 @@
 }
 
 .bg-selected {
-  background-image: linear-gradient(to left, var(--color-primary-light), #1F1F5A);
+  background-image: linear-gradient(to right, var(--color-primary-light), #1F1F5A);
 }
 
 .bg-card-grad{

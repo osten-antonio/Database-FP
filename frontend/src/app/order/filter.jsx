@@ -23,22 +23,22 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
 import { ListSelector } from "@/components/widget/ListSelector"
+import { Calendar as CalendarIcon } from "lucide-react";
 
-export function FilterWindow({setOpen, filters = {}, setFilters}){ 
+export function FilterWindow({isOpen, setOpen, filters = {}, setFilters}){ 
     const [orderedRange, setOrdered] = useState(filters.orderedRange ?? undefined);
     const [deliveryRange, setDelivery] = useState(filters.deliveryRange ?? undefined);
     const [warehouses, setWarehouses] = useState(filters.warehouses ?? []);
     const [suppliers, setSuppliers] = useState(filters.suppliers ?? []);
     const [minCost, setMinCost] = useState(filters.minCost??'');
     const [maxCost, setMaxCost] = useState(filters.maxCost??'');
-    const [deliver,setDeliver] = useState(filters.deliver);
-    const [overdue,setOverdue] = useState(filters.overdue);
-    const [inProgress,setInProgress] = useState(filters.inProgress);
+    const [deliver,setDeliver] = useState(filters.deliver?? false);
+    const [overdue,setOverdue] = useState(filters.overdue?? false);
+    const [inProgress,setInProgress] = useState(filters.inProgress?? false);
     const [availableWarehouses, setAvailableWarehouses] = useState([]);
     const [availableSuppliers, setAvailableSuppliers] = useState([]);
 
@@ -87,8 +87,8 @@ export function FilterWindow({setOpen, filters = {}, setFilters}){
 
         return (
             <Dialog>
-                <DialogTrigger className="bg-primary text-text px-2 p-1 rounded-md text-sm">+ Add</DialogTrigger>
-                <DialogContent className='w-fit bg-secondary'>
+                <DialogTrigger className="bg-primary-light text-text px-2 p-1 rounded-md text-sm">+ Add</DialogTrigger>
+                <DialogContent className='w-fit bg-secondary border-2 border-accent-dark'>
                     <DialogHeader>
                     <DialogTitle className='text-text-dark'>Select {name}</DialogTitle>
                        <Select onValueChange={setSelected}>
@@ -132,14 +132,14 @@ export function FilterWindow({setOpen, filters = {}, setFilters}){
             <div className="flex flex-col gap-3">
             <Popover>
                 <PopoverTrigger asChild>
-                <Button variant="outline" id="dates" className="w-56 justify-between bg-accent-dark border-accent-ui text-text-dark">
+                <Button variant="outline" id="dates" className="w-56 justify-between bg-secondary border-accent-dark text-text-dark">
                     {range?.from && range?.to
                     ? `${range.from.toLocaleDateString()} - ${range.to.toLocaleDateString()}`
                     : "Select date"}
-                    <ChevronDownIcon />
+                    <CalendarIcon />
                 </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto overflow-hidden p-0 bg-accent-light border-accent-ui" align="start">
+                <PopoverContent className="w-auto overflow-hidden p-0 bg-secondary border-accent-dark border-2" align="start">
                 <Calendar
                     mode="range"
                     selected={range}
@@ -154,7 +154,14 @@ export function FilterWindow({setOpen, filters = {}, setFilters}){
         }
 
     return(
-        <div onClick={()=>{setOpen(false)}} className='overflow-hidden backdrop-blur-sm fixed top-0 left-0 w-screen h-screen z-20 flex items-center justify-center'>
+            <div
+                onClick={() => setOpen(false)}
+                className={`
+                    backdrop-blur-sm fixed top-0 left-0 w-screen h-screen z-20 flex items-center justify-center
+                    transition-opacity duration-200 ease-out
+                    ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+                `}
+            >
             <div onClick={(e) => e.stopPropagation()} className='flex flex-col bg-primary-light max-w-[345px] rounded-2xl p-5 shadow-md shadow-accent-dark border-primary-dark border-2'>
                 <p className="font-bold text-2md text-text">Filter</p>
                 <span className="ml-1">
@@ -171,7 +178,7 @@ export function FilterWindow({setOpen, filters = {}, setFilters}){
                     <p className="font-semibold text-sm mt-2 text-text-light">Cost</p>
                     <form className="mt-1 flex flex-row gap-2 text-text-light">                        
                         <CurrencyInput
-                            className='bg-accent-light py-1 h-full w-full rounded-md text-text-dark px-2'
+                            className='bg-secondary py-1 h-full w-full rounded-md text-text-dark px-2'
                             id="min"
                             name="mincost"
                             prefix="Rp. "
@@ -184,7 +191,7 @@ export function FilterWindow({setOpen, filters = {}, setFilters}){
                         />
                         -
                         <CurrencyInput
-                            className='bg-accent-light py-1 h-full w-full rounded-md text-text-dark px-2'
+                            className='bg-secondary py-1 h-full w-full rounded-md text-text-dark px-2'
                             id="min"
                             name="maxcost"
                             prefix="Rp. "
