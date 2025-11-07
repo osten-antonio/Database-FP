@@ -44,6 +44,7 @@ function DataTable({data, columns, enableRowSelection, idName, setRowSelection, 
         onPaginationChange: setPagination,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
+        enableMultiRowSelection: false,
     });
 
     return (
@@ -70,7 +71,18 @@ function DataTable({data, columns, enableRowSelection, idName, setRowSelection, 
                     <TableBody className="bg-accent-dark">
                         {table.getRowModel().rows.length ? (
                         table.getRowModel().rows.map((row) => (
-                            <TableRow className="border-accent-dark" key={row[idName]}>
+                            <TableRow className="border-accent-dark" key={row[idName]}
+                                onClick={(e) => {
+                                        if(setRowSelection){
+                                            const tag = (e.target && e.target.tagName) || "";
+                                            if (["INPUT", "BUTTON", "A"].includes(tag)) return;
+
+                                            row.toggleSelected();
+                                        }
+                                    }
+                                }
+
+                            >
                             {row.getVisibleCells().map((cell,i) => {
                                 const isLast = i === row.getVisibleCells().length - 1;
                                 

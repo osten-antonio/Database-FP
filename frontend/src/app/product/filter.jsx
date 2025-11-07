@@ -26,18 +26,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ListSelector } from "@/components/widget/ListSelector"
-import { Calendar as CalendarIcon } from "lucide-react";
 
 export function FilterWindow({isOpen, setOpen, filters = {}, setFilters}){ 
-    const [orderedRange, setOrdered] = useState(filters.orderedRange ?? undefined);
-    const [deliveryRange, setDelivery] = useState(filters.deliveryRange ?? undefined);
     const [warehouses, setWarehouses] = useState(filters.warehouses ?? []);
     const [suppliers, setSuppliers] = useState(filters.suppliers ?? []);
     const [minCost, setMinCost] = useState(filters.minCost??'');
     const [maxCost, setMaxCost] = useState(filters.maxCost??'');
-    const [deliver,setDeliver] = useState(filters.deliver?? false);
-    const [overdue,setOverdue] = useState(filters.overdue?? false);
-    const [inProgress,setInProgress] = useState(filters.inProgress?? false);
     const [availableWarehouses, setAvailableWarehouses] = useState([]);
     const [availableSuppliers, setAvailableSuppliers] = useState([]);
 
@@ -126,31 +120,6 @@ export function FilterWindow({isOpen, setOpen, filters = {}, setFilters}){
         )
     }
 
-    const DateRangeSelect = ({range, setRange})=>{
-        return (
-            <div className="flex flex-col gap-3">
-            <Popover>
-                <PopoverTrigger asChild>
-                <Button variant="outline" id="dates" className="w-56 justify-between bg-secondary border-accent-dark text-text-dark">
-                    {range?.from && range?.to
-                    ? `${range.from.toLocaleDateString()} - ${range.to.toLocaleDateString()}`
-                    : "Select date"}
-                    <CalendarIcon />
-                </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto overflow-hidden p-0 bg-secondary border-accent-dark border-2" align="start">
-                <Calendar
-                    mode="range"
-                    selected={range}
-                    captionLayout="dropdown"
-                    onSelect={(range) => {
-                    setRange(range)
-                    }} />
-                </PopoverContent>
-            </Popover>
-            </div>
-        );
-        }
 
     return(
         <div
@@ -192,13 +161,16 @@ export function FilterWindow({isOpen, setOpen, filters = {}, setFilters}){
                             }}
                         />
                     </form>
-                    <p className="font-semibold text-sm mt-2 text-text-light">Status</p>
-
+                    <p className="font-semibold text-sm mt-2 text-text-light">Suppliers</p>
+                    <ListSelector 
+                        Dialog={()=>(<><AddItem availableItems={availableSuppliers} itemIDName='supplier_id' name='supplier'/></>)} 
+                        items={suppliers} setItems={setSuppliers}
+                    />
                     <p className="font-semibold text-sm mt-2 text-text-light">Category</p> 
                     {/* TODO */}
                     <ListSelector 
                         Dialog={()=>(<><AddItem availableItems={availableWarehouses} itemIDName='warehouse_id' name='category'/></>)} 
-                        items={warehouses} setItems={setWarehouses} itemIDName='warehouse_id'
+                        items={warehouses} setItems={setWarehouses}
                     />
 
                     <div className="flex flex-row flex-nowrap justify-between mt-3">
@@ -207,15 +179,10 @@ export function FilterWindow({isOpen, setOpen, filters = {}, setFilters}){
                         onClick={() => {
 
                         setFilters({
-                            orderedRange,
-                            deliveryRange,
                             warehouses,
                             suppliers,
                             minCost: minCost,
                             maxCost: maxCost,
-                            deliver: deliver,
-                            overdue: overdue,
-                            inProgress: inProgress
                         });
 
                         setOpen(false);

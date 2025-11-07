@@ -74,7 +74,11 @@ export default function Order() {
             }
         }
         getOrders();
-    },[])
+    },[]);
+
+    useEffect(()=>{
+        console.log(rowSelection);
+    },[rowSelection]);
 
     const tableProps = {
         data:orders,
