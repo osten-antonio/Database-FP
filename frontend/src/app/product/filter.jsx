@@ -164,16 +164,6 @@ export function FilterWindow({isOpen, setOpen, filters = {}, setFilters}){
             <div onClick={(e) => e.stopPropagation()} className='flex flex-col bg-primary-light max-w-[345px] rounded-2xl p-5 shadow-md shadow-accent-dark border-primary-dark border-2'>
                 <p className="font-bold text-2md text-text">Filter</p>
                 <span className="ml-1">
-                    <p className="font-semibold text-sm mt-2 text-text-light">Date ordered</p>
-                    <div className="flex items-center gap-2 mt-1">
-                        <DateRangeSelect range={orderedRange} setRange={setOrdered}/>
-                        <Button onClick={()=>{setOrdered(undefined)}}>Clear</Button>
-                    </div>
-                    <p className="font-semibold text-sm mt-2 text-text-light">Delivery date</p>
-                    <div className="flex items-center gap-2 mt-1">
-                        <DateRangeSelect range={deliveryRange} setRange={setDelivery}/>
-                        <Button onClick={()=>{setDelivery(undefined)}}>Clear</Button>
-                    </div>
                     <p className="font-semibold text-sm mt-2 text-text-light">Cost</p>
                     <form className="mt-1 flex flex-row gap-2 text-text-light">                        
                         <CurrencyInput
@@ -203,51 +193,14 @@ export function FilterWindow({isOpen, setOpen, filters = {}, setFilters}){
                         />
                     </form>
                     <p className="font-semibold text-sm mt-2 text-text-light">Status</p>
-                    <form className="mt-1 flex flex-row gap-3 text-text-light items-center">                        
-                        <span className="flex items-center flex-row gap-1">
-                            <input   
-                                checked={deliver}
-                                onChange={(e) => setDeliver(e.target.checked)}
-                                className="accent-primary border rounded-xs w-4 h-4 cursor-pointer hover:accent-primary-light"
-                                type="checkbox" id="deliver"
-                            />
-                            <label> Delivered</label>
-                        </span>
-                        <span className="flex items-center flex-row gap-1">
-                            <input 
-                                checked={overdue}
-                                onChange={(e) => setOverdue(e.target.checked)}
-                                className="accent-primary border rounded-xs w-4 h-4 cursor-pointer hover:accent-primary-light"
-                                type="checkbox" id="overdue" 
-                            />
-                            <label> Overdue</label>
-                        </span>
-                        <span className="flex items-center flex-row gap-1">
-                            <input
-                                checked={inProgress} 
-                                onChange={(e) => setInProgress(e.target.checked)} 
-                                className="accent-primary border rounded-xs w-4 h-4 cursor-pointer hover:accent-primary-light" 
-                                type="checkbox" id="progress"
-                            />
-                            <label> In progress</label>
-                        </span>
-                    </form>
-                    <p className="font-semibold text-sm mt-2 text-text-light">Status</p>
-                    <ListSelector 
-                        Dialog={()=>(<><AddItem availableItems={availableWarehouses} itemIDName='warehouse_id' name='warehouse'/></>)} 
-                        items={warehouses} setItems={setWarehouses} itemIDName='warehouse_id'
-                    />
+
                     <p className="font-semibold text-sm mt-2 text-text-light">Category</p> 
                     {/* TODO */}
                     <ListSelector 
                         Dialog={()=>(<><AddItem availableItems={availableWarehouses} itemIDName='warehouse_id' name='category'/></>)} 
                         items={warehouses} setItems={setWarehouses} itemIDName='warehouse_id'
                     />
-                    <p className="font-semibold text-sm mt-2 text-text-light">Supplier</p>
-                    <ListSelector 
-                        Dialog={()=>(<><AddItem availableItems={availableSuppliers} itemIDName='id' name='supplier'/></>)} 
-                        items={suppliers} setItems={setSuppliers} itemIDName='id'
-                    />      
+
                     <div className="flex flex-row flex-nowrap justify-between mt-3">
                     <Button onClick={()=>{setOpen(false)}}>Close</Button>
                     <Button

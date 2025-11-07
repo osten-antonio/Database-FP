@@ -250,6 +250,10 @@ export function CreateWindow({isOpen, setOpen}){
     const [availableItems, setAvailableItems] = useState([]);
     const [selectedItems, setSelectedItems] = useState([]);
 
+    useEffect(()=>{
+        setSelectedItems([]);
+        // setAvailableItems([]);
+    },[isOpen])
 
     useEffect(()=>{
         async function getCustomers(){
@@ -320,7 +324,7 @@ export function CreateWindow({isOpen, setOpen}){
     return(
         <div
             onClick={() => setOpen(false)}
-            className={`
+            className={`overflow-y-auto
                 backdrop-blur-sm fixed top-0 left-0 w-screen h-screen z-20 flex items-center justify-center
                 transition-opacity duration-200 ease-out
                 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}
