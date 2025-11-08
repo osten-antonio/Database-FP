@@ -193,10 +193,11 @@ export default function AddressPicker({ onSelect }) {
             </div>
             <div className="flex flex-row gap-2 mt-auto">
               <DialogClose asChild>
-                  <Button variant="outline">Cancel</Button>
+                  <Button variant="outline" className='shadow-sm bg-accent-light border-primary-dark border text-text-dark hover:bg-accent-dark transition-color duration-200 ease-in-out'>Cancel</Button>
                 </DialogClose>
                 <DialogClose asChild>
                   <Button type="submit" 
+                    className='shadow-sm hover:bg-accent-dark transition-colors duration-200 ease-in-out'
                       disabled={(!selected || selected.address==="Unknown location") || 
                                 !(/^\d+$/.test(phonenum)) || phonenum.length!=12}
                       onClick={()=>{

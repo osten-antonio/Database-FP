@@ -30,7 +30,7 @@ import { CreateWindow } from "@/components/sections/customer/create";
 export default function Customers(){
     const [customers, setCustomers] = useState([]);
     const [customerAddresses, setCAddresses] = useState([]);
-    const [create, setCreate] = useState(true);
+    const [create, setCreate] = useState(false);
     const [pagination, setPagination] = useState({
         pageIndex: 0,
         pageSize: 10,

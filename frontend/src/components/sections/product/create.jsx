@@ -199,10 +199,10 @@ function CreateCategory({setCategories}) {
                 </div>
                 <DialogFooter>
                     <DialogClose asChild>
-                    <Button variant="outline">Cancel</Button>
+                    <Button variant="outline" >Cancel</Button>
                     </DialogClose>
                     {/* TODO on create, call api, fetch back category update category*/}
-                    <Button type="submit">Create</Button> 
+                    <Button type="submit" className='shadow-sm hover:bg-accent-dark transition-colors duration-200 ease-in-out'>Create</Button> 
                 </DialogFooter>
                 </DialogContent>
             </form>
@@ -265,8 +265,8 @@ export function CreateWindow({isOpen, setOpen}){
                         </div>
                     </div>
                     <div className="flex flex-row flex-nowrap justify-between mt-3">
-                        <Button onClick={()=>{setOpen(false)}}>Close</Button>
-                        <Button
+                        <Button onClick={()=>{setOpen(false)}} className='shadow-sm bg-accent-light border-primary-dark border text-text-dark hover:bg-accent-dark transition-color duration-200 ease-in-out'>Close</Button>
+                        <Button className='shadow-sm hover:bg-accent-dark transition-colors duration-200 ease-in-out'
                             onClick={() => {
                                 // TODO 
                                 setOpen(false);

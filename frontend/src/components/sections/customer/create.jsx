@@ -145,8 +145,8 @@ export function CreateWindow({isOpen, setOpen}){
                     </div>
                     <AddressTable addresses={addresses} setAddresses={setAddresses}/>
                     <div className="flex flex-row flex-nowrap justify-between mt-3">
-                        <Button onClick={()=>{setOpen(false)}}>Close</Button>
-                        <Button
+                        <Button onClick={()=>{setOpen(false)}} className='shadow-sm bg-accent-light border-primary-dark border text-text-dark hover:bg-accent-dark transition-color duration-200 ease-in-out'>Close</Button>
+                        <Button className='shadow-sm hover:bg-accent-dark transition-colors duration-200 ease-in-out'
                             onClick={() => {
                                 // TODO 
                                 setOpen(false);

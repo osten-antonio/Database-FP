@@ -217,7 +217,7 @@ function ItemsTable({ availableItems, selectedItem, setSelected }) {
                             </p>
                             <div className="flex items-center gap-2">
                                 <DialogClose asChild>
-                                    <Button>
+                                    <Button className='bg-accent-light text-text-dark hover:bg-accent-dark transition-color duration-200 ease-in-out'>
                                         Cancel
                                     </Button>
                                 </DialogClose>
@@ -351,8 +351,8 @@ export function CreateWindow({isOpen, setOpen}){
                     <p className="font-semibold text-sm mt-2 text-text-light">Items</p>
                     <ItemsTable selectedItem={selectedItems} setSelected={setSelectedItems} availableItems={availableItems}  />
                     <div className="flex flex-row flex-nowrap justify-between mt-3">
-                        <Button onClick={()=>{setOpen(false)}}>Close</Button>
-                        <Button
+                        <Button onClick={()=>{setOpen(false)}} className='shadow-sm bg-accent-light border-primary-dark border text-text-dark hover:bg-accent-dark transition-color duration-200 ease-in-out'>Close</Button>
+                        <Button className='shadow-sm hover:bg-accent-dark transition-colors duration-200 ease-in-out'
                             onClick={() => {
                                 // TODO
                                 setOpen(false);
