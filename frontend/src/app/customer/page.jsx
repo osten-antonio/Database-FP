@@ -1,5 +1,4 @@
 'use client';
-import { DataTable } from "@/components/layout/BasicLayout"
 import { useState, useEffect, useMemo } from "react"
 import {ArrowDownFromLine, EllipsisVertical, ArrowUpFromLine, ChevronsLeft, ChevronsRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import api from "@/lib/axios";
@@ -26,13 +25,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button";
-
-
+import { CreateWindow } from "@/components/sections/customer/create";
 
 export default function Customers(){
     const [customers, setCustomers] = useState([]);
     const [customerAddresses, setCAddresses] = useState([]);
-    const [create, setCreate] = useState(false);
+    const [create, setCreate] = useState(true);
     const [pagination, setPagination] = useState({
         pageIndex: 0,
         pageSize: 10,
@@ -126,7 +124,8 @@ export default function Customers(){
     };
     
     return(
-        <div className="p-6 pl-10 w-screen xl:ml-auto xl:w-6/7 2xl:w-8/9 mt-12">          
+        <div className="p-6 pl-10 w-screen xl:ml-auto xl:w-6/7 2xl:w-8/9 mt-12">       
+            <CreateWindow isOpen={create} setOpen={setCreate} />   
             <h1 className='text-text-dark text-3xl font-bold mb-4'>
                 Customer
             </h1>

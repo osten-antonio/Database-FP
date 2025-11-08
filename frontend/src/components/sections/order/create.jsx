@@ -95,7 +95,7 @@ function ItemsTable({ availableItems, selectedItem, setSelected }) {
         header: 'Name',
         cell: ({row}) => {
                 const name = row.getValue('name');
-                return (<span>       {name.length <= 15 ? name : `${name.slice(0, 10)}...`}</span>)
+                return (<span>       {name.length <= 15 ? name : `${name.slice(0, 12)}...`}</span>)
             }
         },
         {
@@ -233,7 +233,6 @@ function ItemsTable({ availableItems, selectedItem, setSelected }) {
             </Dialog>
         </div>
     )
-
 }
 
 

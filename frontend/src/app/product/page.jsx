@@ -1,8 +1,8 @@
 "use client"
 import { useState, useEffect } from 'react';
 import api from '@/lib/axios'
-import { CreateWindow } from './create';
-import { FilterWindow } from './filter';
+import { CreateWindow } from '@/components/sections/product/create';
+import { FilterWindow } from '@/components/sections/product/filter';
 import { BasicLayout } from '@/components/layout/BasicLayout';
 import { Button } from '@/components/ui/button';
 import { EllipsisVertical } from 'lucide-react';

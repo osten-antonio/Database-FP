@@ -2,8 +2,8 @@
 import { useState, useEffect } from 'react';
 import api from '@/lib/axios'
 import { BasicLayout } from '@/components/layout/BasicLayout';
-import { FilterWindow } from './filter';
-import { CreateWindow } from './create';
+import { FilterWindow } from '@/components/sections/order/filter';
+import { CreateWindow } from '@/components/sections/order/create';
 import { EllipsisVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 

@@ -1,8 +1,8 @@
-import {TopProductChartQty} from '@/components/dashboard/TopProductQty'
-import {TopProductChartRev} from '@/components/dashboard/TopProductRev'
-import {StockLevels} from '@/components/dashboard/StockLevels'
-import {TotalSales} from '@/components/dashboard/TotalSales'
-import { RecentOrders } from '@/components/dashboard/RecentOrders'
+import {TopProductChartQty} from '@/components/sections/dashboard/TopProductQty'
+import {TopProductChartRev} from '@/components/sections/dashboard/TopProductRev'
+import {StockLevels} from '@/components/sections/dashboard/StockLevels'
+import {TotalSales} from '@/components/sections/dashboard/TotalSales'
+import { RecentOrders } from '@/components/sections/dashboard/RecentOrders'
 import {
   Card,
   CardDescription,

@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, NotebookText, PackageSearch,Warehouse,HandPlatter,Users } from 'lucide-react'
-import { SidebarButton } from '../SidebarButton';
+import { SidebarButton } from '@/components/widget/SidebarButton';
 
 
 export function Sidebar({isOpen}){
