@@ -49,66 +49,66 @@ function DataTable({data, columns, enableRowSelection, idName, setRowSelection, 
 
     return (
         <div className="overflow-hidden rounded-lg border-0 mt-5 shadow-md w-full shadow-accent-dark">
-                <Table>
-                    <TableHeader className='my-2 bg-primary'>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => {
-                                return (
-                                    <TableHead className='text-text-light font-medium' key={header.id} colSpan={header.colSpan}>
-                                    {header.isPlaceholder
-                                        ? null
-                                        : flexRender(
-                                            header.column.columnDef.header,
-                                            header.getContext()
-                                        )}
-                                    </TableHead>
-                                )
-                                })}
-                            </TableRow>
-                            ))}
-                    </TableHeader>
-                    <TableBody className="bg-accent-dark">
-                        {table.getRowModel().rows.length ? (
-                        table.getRowModel().rows.map((row) => (
-                            <TableRow className="border-accent-dark" key={row[idName]}
-                                onClick={(e) => {
-                                        if(setRowSelection){
-                                            const tag = (e.target && e.target.tagName) || "";
-                                            if (["INPUT", "BUTTON", "A"].includes(tag)) return;
+            <Table>
+                <TableHeader className='my-2 bg-primary'>
+                    {table.getHeaderGroups().map((headerGroup) => (
+                        <TableRow key={headerGroup.id}>
+                            {headerGroup.headers.map((header) => {
+                            return (
+                                <TableHead className='text-text-light font-medium' key={header.id} colSpan={header.colSpan}>
+                                {header.isPlaceholder
+                                    ? null
+                                    : flexRender(
+                                        header.column.columnDef.header,
+                                        header.getContext()
+                                    )}
+                                </TableHead>
+                            )
+                            })}
+                        </TableRow>
+                        ))}
+                </TableHeader>
+                <TableBody className="bg-accent-dark">
+                    {table.getRowModel().rows.length ? (
+                    table.getRowModel().rows.map((row) => (
+                        <TableRow key={row[idName]}
+                            onClick={(e) => {
+                                    if(setRowSelection){
+                                        const tag = (e.target && e.target.tagName) || "";
+                                        if (["INPUT", "BUTTON", "A"].includes(tag)) return;
 
-                                            row.toggleSelected();
-                                        }
+                                        row.toggleSelected();
                                     }
                                 }
+                            }
 
+                        >
+                        {row.getVisibleCells().map((cell,i) => {
+                            const isLast = i === row.getVisibleCells().length - 1;
+                            
+                            return (<TableCell
+                            key={cell.id}
+                            className={`text-text-dark relative font-semibold
+                                ${!isLast ? "after:content-[''] after:absolute after:right-2 after:top-2 after:bottom-2 after:w-px after:bg-primary" : ""}
+                                `}
                             >
-                            {row.getVisibleCells().map((cell,i) => {
-                                const isLast = i === row.getVisibleCells().length - 1;
-                                
-                                return (<TableCell
-                                key={cell.id}
-                                className={`text-text-dark relative font-semibold
-                                    ${!isLast ? "after:content-[''] after:absolute after:right-2 after:top-2 after:bottom-2 after:w-px after:bg-primary" : ""}
-                                    `}
-                                >
-                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                </TableCell>)
-                            })}
-                            </TableRow>
-                        ))
-                        ) : (
-                        <TableRow>
-                            <TableCell
-                            colSpan={columns.length}
-                            className="h-24 text-center text-text-dark"
-                            >
-                            No results.
-                            </TableCell>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </TableCell>)
+                        })}
                         </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+                    ))
+                    ) : (
+                    <TableRow>
+                        <TableCell
+                        colSpan={columns.length}
+                        className="h-24 text-center text-text-dark"
+                        >
+                        No results.
+                        </TableCell>
+                    </TableRow>
+                    )}
+                </TableBody>
+            </Table>
             <div className="flex w-full items-center gap-8 bg-primary-light justify-between p-2">
                 <span className='flex flex-row flex-nowrap gap-8'>
                     <div className="hidden items-center gap-2 lg:flex text-text">

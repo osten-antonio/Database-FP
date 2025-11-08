@@ -4,6 +4,8 @@ import api from '@/lib/axios'
 import { BasicLayout } from '@/components/layout/BasicLayout';
 import { FilterWindow } from './filter';
 import { CreateWindow } from './create';
+import { EllipsisVertical } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function Order() {
     // TODO context for all of the useEffect get functions, redundant API calls in create and filter
@@ -55,9 +57,15 @@ export default function Order() {
         },
         {
             accessorKey: "actions",
-            header: "Actions",
-            // TODO cell
-        },
+            header: "",
+            cell: ({row})=>{                
+                return(
+                    <Button className='mx-0'>
+                        <EllipsisVertical />
+                    </Button>
+                )
+            }
+        }
     ];
 
 

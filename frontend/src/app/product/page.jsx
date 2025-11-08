@@ -4,6 +4,8 @@ import api from '@/lib/axios'
 import { CreateWindow } from './create';
 import { FilterWindow } from './filter';
 import { BasicLayout } from '@/components/layout/BasicLayout';
+import { Button } from '@/components/ui/button';
+import { EllipsisVertical } from 'lucide-react';
 
 export default function Products(){
     const [products,setProducts] = useState([]);
@@ -58,7 +60,13 @@ export default function Products(){
         {
             accessorKey: "actions",
             header: "",
-            // TODO cell: button :
+            cell: ({row})=>{                
+                return(
+                    <Button className='mx-0'>
+                        <EllipsisVertical />
+                    </Button>
+                )
+            }
         }
     ];
 
