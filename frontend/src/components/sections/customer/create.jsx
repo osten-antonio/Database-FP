@@ -1,12 +1,5 @@
 import { useState, useCallback, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { SearchableCBox } from "@/components/widget/SearchableCBox";
-import CurrencyInput from 'react-currency-input-field';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
 import {
   flexRender,
   getCoreRowModel,
