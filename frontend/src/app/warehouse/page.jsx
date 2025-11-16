@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import { DataTable } from "@/components/layout/BasicLayout";
 import { useRouter } from 'next/navigation';
 
- export default function Warehouse(){
+export default function Warehouse(){
     const [warehouses, setWarehouses] = useState([]);
     const [rowSelection, setRowSelection] = useState({});
     const router = useRouter();

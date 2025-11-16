@@ -49,7 +49,7 @@ export default function Products(){
             cell: ({ row }) => {
                 const price = Number(row.getValue("price"));
                 const formatted = price % 1 === 0 ? price.toString() : price.toFixed(3);
-                return formatted;
+                return `Rp. ${formatted}`;
             }
         },
         {
