@@ -98,7 +98,7 @@ function DataTable({data, columns, enableRowSelection, idName, setRowSelection, 
                         </TableRow>
                     ))
                     ) : (
-                    <TableRow>
+                    <TableRow key='no-res'>
                         <TableCell
                         colSpan={columns.length}
                         className="h-24 text-center text-text-dark"

@@ -15,12 +15,12 @@ export function Sidebar({isOpen}){
             xl:block pt-20 fixed z-5 h-full xl:translate-x-0
             `}>
             <ul className=''>
-                <SidebarButton Icon={LayoutDashboard} label='Dashboard' route='/' pathname={pathname} />
-                <SidebarButton Icon={NotebookText} label='Orders' route='/order' pathname={pathname} />
-                <SidebarButton Icon={PackageSearch} label='Products' route='/product' pathname={pathname} />
-                <SidebarButton Icon={Warehouse} label='Warehouses' route='/warehouse' pathname={pathname} />
-                <SidebarButton Icon={HandPlatter} label='Suppliers' route='/supplier' pathname={pathname} />
-                <SidebarButton Icon={Users} label='Customers' route='/customer' pathname={pathname} />
+                <SidebarButton Icon={LayoutDashboard} label='Dashboard' route='/home' pathname={pathname} />
+                <SidebarButton Icon={NotebookText} label='Orders' route='/home/order' pathname={pathname} />
+                <SidebarButton Icon={PackageSearch} label='Products' route='/home/product' pathname={pathname} />
+                <SidebarButton Icon={Warehouse} label='Warehouses' route='/home/warehouse' pathname={pathname} />
+                <SidebarButton Icon={HandPlatter} label='Suppliers' route='/home/supplier' pathname={pathname} />
+                <SidebarButton Icon={Users} label='Customers' route='/home/customer' pathname={pathname} />
             </ul>
         </div>
     )

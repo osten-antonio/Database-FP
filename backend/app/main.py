@@ -1,0 +1,40 @@
+from fastapi import FastAPI
+
+import os
+import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
+from .db import connect
+
+app = FastAPI()
+
+@app.get("/test-db")
+def test_db_connection():
+    try:
+        conn = connect()
+        cursor = conn.cursor()
+        cursor.execute("SELECT 1")
+        result = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+
+        return {"status": "ok", "result": result}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+@app.get("/show-tables")
+def show_tables():
+    try:
+        conn = connect()
+        cursor = conn.cursor()
+        cursor.execute("SHOW TABLES")
+        tables = [table[0] for table in cursor.fetchall()]
+
+        cursor.close()
+        conn.close()
+
+        return {"tables": tables}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+

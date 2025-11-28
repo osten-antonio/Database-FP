@@ -325,6 +325,7 @@ def get_warehouses():
         { "warehouse_id": 4, "account_id": 104, "name": "Medan North Logistics", "address": "Jl. Gatot Subroto No.19, Medan, Sumatera Utara 20122" },
         { "warehouse_id": 5, "account_id": 105, "name": "Denpasar Bali Storage", "address": "Jl. Sunset Road No.21, Kuta, Bali 80361" },
         { "warehouse_id": 6, "account_id": 106, "name": "Yogyakarta Regional Hub", "address": "Jl. Malioboro No.56, Yogyakarta 55213" }
+    
     ]
 
 if __name__ == "__main__":

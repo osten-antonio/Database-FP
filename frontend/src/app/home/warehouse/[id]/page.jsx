@@ -312,7 +312,7 @@ export default function InnerWarehouse(){
                                 </TableBody>
                             </Table>
                             <button 
-                                onClick={(e)=>{router.push('/warehouse/'+id+'/product')}}
+                                onClick={(e)=>{router.push(id+'/product')}}
                                 className='mx-auto w-full bg-primary-light text-xs py-1 hover:bg-primary'
                             >See more</button>
                         </div>
