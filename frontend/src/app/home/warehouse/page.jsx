@@ -7,13 +7,19 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Button } from "@/components/ui/button";
 import api from '@/lib/axios'
 import { useEffect, useState } from "react";
 import { DataTable } from "@/components/layout/BasicLayout";
 import { CreateWindow } from "@/components/sections/warehouse/create";
 import { useRouter } from 'next/navigation';
-
+import { EllipsisVertical } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export default function Warehouse(){
     const [warehouses, setWarehouses] = useState([]);
@@ -74,7 +80,25 @@ export default function Warehouse(){
         },{
             accessorKey: 'action',
             header:'',
-            cell: ({row})=>(<Button>:</Button>)
+            cell: ({row})=>{                
+                return(
+                    <DropdownMenu modal={false}>
+                        <DropdownMenuTrigger asChild>
+                        <Button className='mx-0'>
+                            <EllipsisVertical />
+                        </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-40" align="end">
+                            <DropdownMenuItem onSelect={() => console.log("Edit")}>
+                            Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => console.log("Delete")}>
+                            Delete
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )
+            }
         }
     ]
 

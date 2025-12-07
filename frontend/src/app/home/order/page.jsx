@@ -6,6 +6,12 @@ import { FilterWindow } from '@/components/sections/order/filter';
 import { CreateWindow } from '@/components/sections/order/create';
 import { EllipsisVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export default function Order() {
     // TODO context for all of the useEffect get functions, redundant API calls in create and filter
@@ -60,9 +66,21 @@ export default function Order() {
             header: "",
             cell: ({row})=>{                
                 return(
-                    <Button className='mx-0'>
-                        <EllipsisVertical />
-                    </Button>
+                    <DropdownMenu modal={false}>
+                        <DropdownMenuTrigger asChild>
+                        <Button className='mx-0'>
+                            <EllipsisVertical />
+                        </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-40" align="end">
+                            <DropdownMenuItem onSelect={() => console.log("Edit")}>
+                            Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => console.log("Delete")}>
+                            Delete
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 )
             }
         }

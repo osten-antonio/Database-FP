@@ -26,6 +26,12 @@ import {
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button";
 import { CreateWindow } from "@/components/sections/customer/create";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Customers(){
     const [customers, setCustomers] = useState([]);
@@ -190,9 +196,21 @@ export default function Customers(){
                                                     <Button onClick={() => toggleRow(customer.customer_id)} className='mx-0'>
                                                         {isExpanded ? <ArrowUpFromLine/> : <ArrowDownFromLine/>}
                                                     </Button>
-                                                    <Button className='mx-0'>
-                                                        <EllipsisVertical />
-                                                    </Button>
+                                                    <DropdownMenu modal={false}>
+                                                        <DropdownMenuTrigger asChild>
+                                                        <Button className='mx-0'>
+                                                            <EllipsisVertical />
+                                                        </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent className="w-40" align="end">
+                                                            <DropdownMenuItem onSelect={() => console.log("Edit")}>
+                                                            Edit
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onSelect={() => console.log("Delete")}>
+                                                            Delete
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
                                                 </TableCell>
                                             </TableRow>
                                             {isExpanded && customerAddr?.addresses && customerAddr.addresses.map((addr, i) => (
