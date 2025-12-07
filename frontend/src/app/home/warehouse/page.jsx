@@ -11,11 +11,14 @@ import { Button } from "@/components/ui/button";
 import api from '@/lib/axios'
 import { useEffect, useState } from "react";
 import { DataTable } from "@/components/layout/BasicLayout";
+import { CreateWindow } from "@/components/sections/warehouse/create";
 import { useRouter } from 'next/navigation';
+
 
 export default function Warehouse(){
     const [warehouses, setWarehouses] = useState([]);
     const [rowSelection, setRowSelection] = useState({});
+    const [create, setCreate] = useState(false);
     const router = useRouter();
 
     useEffect(()=>{
@@ -84,6 +87,9 @@ export default function Warehouse(){
         rowSelection
     }
     return (
+        <>
+        {create && <CreateWindow setOpen={setCreate} isOpen={create}/>}
+        
         <div className="p-6 pl-10 w-screen xl:ml-auto xl:w-6/7 2xl:w-8/9 mt-12">          
 
             <h1 className='text-text-dark text-3xl font-bold mb-4'>
@@ -104,6 +110,9 @@ export default function Warehouse(){
                     </Breadcrumb>
                 </div>
                 <div className='w-xl flex flex-row gap-2'>
+                    <Button
+                        className='hover:bg-accent-dark transition-colors duration-200 ease-in-out h-full shadow-accent-dark shadow-md'
+                        onClick={() => setCreate(true)}>Create</Button>
                     <form className='w-full min-w-[250px] grow h-10'>
                         <input type='text' className='bg-primary-light h-full w-full rounded-md text-text-light px-2 shadow-md shadow-accent-dark' placeholder='Search'/>
                     </form>
@@ -111,5 +120,6 @@ export default function Warehouse(){
                 <DataTable {...tableProps}/>
             </div>
         </div>
+        </>
     );
  }

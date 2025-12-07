@@ -1,5 +1,6 @@
 from ..db import connect
 
+
 def get_customers():
     try:
         conn = connect()
@@ -45,3 +46,4 @@ if __name__ == '__main__':
     test here
     '''
     pass
+    print('t')
