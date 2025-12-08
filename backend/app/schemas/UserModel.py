@@ -8,5 +8,5 @@ class UserResponse(BaseModel):
     id: int
     username:str
     role:str
-    
-
+    access_token: str
+    token_type: str
