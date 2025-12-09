@@ -4,21 +4,31 @@ def search_order(item='',customer_name='', address=''):
     try:
         conn = connect()
         cursor = conn.cursor()
-        cursor.execute("""
+        sql = """
             SELECT 
                 o.order_id, ol.amount, ol.order_price, 
-                c.name, a.delivery_address, o.date_ordered, 
+                c.name, a.delivery_address, o.order_date, 
                 o.expected_delivery_date, o.is_delivered
-            FROM "Order" o
+            FROM `Order` o
             JOIN Address a ON o.address_id = a.address_id
             JOIN Customer c ON a.customer_id = c.customer_id
             JOIN OrderLine ol ON o.order_id = ol.order_id
             JOIN Product p ON ol.product_id = p.product_id
-            WHERE LOWER(a.delivery_address) LIKE LOWER(%s)
-            AND LOWER(c.customer_name) LIKE LOWER(%s)
-            AND LOWER(p.product_name) LIKE LOWER(%s);
+            WHERE 1=1
+        """
+        params = []
 
-        """, (address, customer_name, item))
+        if item:
+            sql+= " AND LOWER(p.product_name) LIKE LOWER(%s)"
+            params.append(f"%{item}%")
+        if customer_name:
+            sql+= " AND LOWER(c.name) LIKE LOWER(%s)"
+            params.append(f"%{customer_name}%")
+        if address:
+            sql+= " AND LOWER(a.delivery_address) LIKE LOWER(%s)"
+            params.append(f"%{address}%")
+
+        cursor.execute(sql, params)
         result = cursor.fetchall()
 
         formatted_result = []
@@ -29,7 +39,7 @@ def search_order(item='',customer_name='', address=''):
                 "order_price": row[2],
                 "customer_name": row[3],
                 "delivery_address": row[4],
-                "date_ordered": row[5],
+                "order_date": row[5],
                 "expected_delivery_date": row[6],
                 "is_delivered": row[7]
             })
@@ -41,7 +51,7 @@ def search_order(item='',customer_name='', address=''):
         return {"status": "error", "message": str(e)}
 
 def filter_order(
-        date_ordered=None,deliver_date=None,
+        order_date=None,deliver_date=None,
         cost_min=0,cost_max=float('inf'),
         delivered=False,overdue=False,in_progress=False,
         warehouse=[],category=[],supplier=[]
@@ -50,9 +60,9 @@ def filter_order(
         sql = """
             SELECT 
                 o.order_id, ol.amount, ol.order_price, 
-                c.name, a.delivery_address, o.date_ordered, 
+                c.name, a.delivery_address, o.order_date, 
                 o.expected_delivery_date, o.is_delivered
-            FROM "Order" o
+            FROM `Order` o
             JOIN Address a ON o.address_id = a.address_id
             JOIN Customer c ON a.customer_id = c.customer_id
             JOIN OrderLine ol ON o.order_id = ol.order_id
@@ -64,9 +74,9 @@ def filter_order(
 
         params = []
 
-        if date_ordered:
-            sql += " AND o.date_ordered = %s"
-            params.append(date_ordered)
+        if order_date:
+            sql += " AND o.order_date = %s"
+            params.append(order_date)
 
         if deliver_date:
             sql += " AND o.expected_delivery_date = %s"
@@ -119,11 +129,26 @@ def delete_order(order_id,product_id):
         conn = connect()
 
         cursor = conn.cursor()
+        cursor.execute(""" START TRANSACTION; """)
         cursor.execute("DELETE FROM OrderLine WHERE product_id = %s AND order_id = %s", (product_id, order_id))
-            
+        
+        cursor.execute("SELECT COUNT(*) FROM OrderLine WHERE order_id = %s", (order_id,))
+        count = cursor.fetchone()[0]
+        if count == 0:
+            cursor.execute("DELETE FROM `Order` WHERE order_id = %s", (order_id,))
+        cursor.execute(""" COMMIT; """)
+        cursor.close()
         conn.close()
     except Exception as e:
+        if conn:
+            conn.rollback()
         return {"status": "error", "message": str(e)}
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
     
 def create_order(
         warehouse_id,address_id,order_date,delivery_date,items=[]
@@ -138,12 +163,13 @@ def create_order(
         delivery_date (string): Expected delivery date (format: 'YYYY-MM-DD')
         items (list[dict]): each dict contains 'product_id', 'amount', 'order_price'
     '''
+    # TODO update inventory accordingly using warehouse_id, and items
     try:
         conn = connect()
         cursor = conn.cursor()
         cursor.execute(""" START TRANSACTION; """)
         cursor.execute("""
-            INSERT INTO "Order" (address_id, warehouse_id, date_ordered, expected_delivery_date, is_delivered)
+            INSERT INTO `Order` (address_id, warehouse_id, order_date, expected_delivery_date, is_delivered)
             VALUES (%s, %s, %s, %s, FALSE);
         """, (address_id, warehouse_id, order_date, delivery_date))
         order_id = cursor.lastrowid
@@ -174,7 +200,7 @@ def edit_order(
     Edit entire order, from order table, not orderline
 
     Args:
-        date_ordered (string): dd-mm-yyyy format
+        order_date (string): dd-mm-yyyy format
         delivery_date (string): dd-mm-yyyy format
         items (list[int]): list of id 
 
@@ -186,7 +212,7 @@ def edit_order(
         cursor = conn.cursor()
         cursor.execute(""" START TRANSACTION; """)
         cursor.execute("""
-            UPDATE "Order" SET address_id = %s, warehouse_id = %s, date_ordered = %s, expected_delivery_date = %s, is_delivered = FALSE
+            UPDATE `Order` SET address_id = %s, warehouse_id = %s, order_date = %s, expected_delivery_date = %s, is_delivered = FALSE
             WHERE order_id = %s;
         """, (address_id, warehouse_id, order_date, delivery_date, order_id))
         for i, item_id in enumerate(item_ids):
@@ -219,25 +245,63 @@ def get_order(limit=None):
         sql = '''
             SELECT 
                 o.order_id, ol.amount, ol.order_price, 
-                c.name, a.delivery_address, o.date_ordered, 
+                c.name, a.delivery_address, o.order_date, 
                 o.expected_delivery_date, o.is_delivered
-            FROM "Order" o
+            FROM `Order` o
             JOIN Address a ON o.address_id = a.address_id
             JOIN Customer c ON a.customer_id = c.customer_id
             JOIN OrderLine ol ON o.order_id = ol.order_id
             JOIN Product p ON ol.product_id = p.product_id
+            WHERE 1 = 1
         '''
         if limit:
             sql += " LIMIT %s"
         cursor = conn.cursor()
         cursor.execute(sql, (limit,) if limit else ())
-        
+        results = cursor.fetchall()
+        formatted_result = []
+        for row in results:
+            formatted_result.append({
+                "order_id": row[0],
+                "amount": row[1],
+                "order_price": row[2],
+                "customer_name": row[3],
+                "delivery_address": row[4],
+                "order_date": row[5],
+                "expected_delivery_date": row[6],
+                "is_delivered": row[7]
+            })
+        cursor.close()
         conn.close()
+        return {"status": "ok", "result": formatted_result}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
 if __name__ == '__main__':
-    '''
-    test here
-    '''
+    # print('--')
+    # print(create_order(
+    #     warehouse_id=1,
+    #     address_id=2,
+    #     order_date='2024-06-01',
+    #     delivery_date='2024-06-10',
+    #     items=[
+    #         {'product_id': 3, 'amount': 2, 'order_price': 50.0},
+    #     ]
+    # ))
+    # print('--')
+    # print(get_order())
+    # print(delete_order(5,1))
+    # print(edit_order(
+    #     order_id=7,
+    #     warehouse_id=1,
+    #     address_id=1,
+    #     order_date='2024-06-05',
+    #     delivery_date='2024-07-15',
+    #     item_ids=[1],
+    #     items=[
+    #         {'product_id': 1, 'amount': 3, 'order_price': 75.0},
+    #     ]
+    # ))
+
+    # print(search_order(address='AAAA'))
     pass
