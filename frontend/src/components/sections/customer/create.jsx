@@ -13,7 +13,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import AddressPicker from './AddressPicker';
+import dynamic from "next/dynamic";
+
+const AddressPicker = dynamic(() => import("./AddressPicker"), {
+  ssr: false,
+});
 
 function AddressTable({addresses, setAddresses}){
     const handleRemove = (i) => {

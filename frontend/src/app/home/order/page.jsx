@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useState, useEffect } from 'react';
 import api from '@/lib/axios'
 import { BasicLayout } from '@/components/layout/BasicLayout';
@@ -12,11 +12,22 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 export default function Order() {
     // TODO context for all of the useEffect get functions, redundant API calls in create and filter
     const [orders,setOrders] = useState([]);
     const [rowSelection, setRowSelection] = useState({});
+    const [confirmation, setConfirmation] = useState(false);
 
     const columns = [
         {
@@ -67,19 +78,21 @@ export default function Order() {
             cell: ({row})=>{                
                 return(
                     <DropdownMenu modal={false}>
-                        <DropdownMenuTrigger asChild>
+                    <DropdownMenuTrigger asChild>
                         <Button className='mx-0'>
-                            <EllipsisVertical />
+                        <EllipsisVertical />
                         </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-40" align="end">
-                            <DropdownMenuItem onSelect={() => console.log("Edit")}>
-                            Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={() => console.log("Delete")}>
-                            Delete
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
+                    </DropdownMenuTrigger>
+
+                    <DropdownMenuContent className="w-40" align="end">
+                        <DropdownMenuItem onClick={() => console.log("Edit")}>
+                        Edit
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem onClick={() => setConfirmation(true)}>
+                        Delete
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
                     </DropdownMenu>
                 )
             }
@@ -116,6 +129,20 @@ export default function Order() {
     }
     return(
         <>
+            <Dialog open={confirmation} onOpenChange={setConfirmation} >
+                <DialogContent className="[&~.fixed.inset-0]:bg-transparent">
+                    <DialogHeader>
+                    <DialogTitle className='text-text-dark'>Are you absolutely sure?</DialogTitle>
+                    <DialogDescription>
+                        This action cannot be undone. Are you sure you want to permanently
+                        delete this order from our servers?
+                    </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                    <Button type="submit">Confirm</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
             <BasicLayout name='Orders' 
                 tableProps={tableProps} 
                 FilterWindow={FilterWindow} 

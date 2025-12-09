@@ -8,7 +8,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import api from '@/lib/axios'
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { DataTable } from "@/components/layout/BasicLayout";
 import { CreateWindow } from "@/components/sections/warehouse/create";
 import { useRouter } from 'next/navigation';
@@ -20,12 +20,23 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 export default function Warehouse(){
     const [warehouses, setWarehouses] = useState([]);
     const [rowSelection, setRowSelection] = useState({});
     const [create, setCreate] = useState(false);
     const router = useRouter();
+    const [confirmation, setConfirmation] = useState(false);
 
     useEffect(()=>{
         async function getWarehouses(){
@@ -113,7 +124,20 @@ export default function Warehouse(){
     return (
         <>
         {create && <CreateWindow setOpen={setCreate} isOpen={create}/>}
-        
+        <Dialog open={confirmation} onOpenChange={setConfirmation} >
+            <DialogContent className="[&~.fixed.inset-0]:bg-transparent">
+                <DialogHeader>
+                <DialogTitle className='text-text-dark'>Are you absolutely sure?</DialogTitle>
+                <DialogDescription>
+                    This action cannot be undone. Are you sure you want to permanently
+                    delete this product from your warehouse?
+                </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                <Button type="submit">Confirm</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
         <div className="p-6 pl-10 w-screen xl:ml-auto xl:w-6/7 2xl:w-8/9 mt-12">          
 
             <h1 className='text-text-dark text-3xl font-bold mb-4'>
@@ -124,11 +148,11 @@ export default function Warehouse(){
                     <Breadcrumb>
                         <BreadcrumbList>
                             <BreadcrumbItem>
-                            <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                            <BreadcrumbLink href="/home/">Home</BreadcrumbLink>
                             </BreadcrumbItem>
                             <BreadcrumbSeparator />
                             <BreadcrumbItem>
-                            <BreadcrumbPage href='/warehouse'>Warehouse</BreadcrumbPage>
+                            <BreadcrumbPage href='/home/warehouse'>Warehouse</BreadcrumbPage>
                             </BreadcrumbItem>
                         </BreadcrumbList>
                     </Breadcrumb>
