@@ -17,11 +17,11 @@ def get_suppliers():
 
         cur.execute(query)
         rows = cur.fetchall()
+        conn.close()
 
         #print('\n[DEBUG] query returned:', rows)
 
-        conn.close()
-        return {"status": "success", "message": rows}
+        return {"status": "success", "data": rows}
         
     except Exception as e:
         #print('\n[DEBUG] ERROR:', e)
@@ -61,11 +61,11 @@ def search_supplier(name='',address='',email=''):
 
         cur.execute(query, params)
         rows = cur.fetchall()
+        conn.close()
 
         #print('\n[DEBUG] query returned:', rows)
 
-        conn.close()
-        return {"status": "success", "message": rows}
+        return {"status": "success", "data": rows}
 
     except Exception as e:
         #print('\n[DEBUG] ERROR:', repr(e))
