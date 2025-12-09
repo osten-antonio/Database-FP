@@ -44,4 +44,16 @@ if __name__ == '__main__':
     '''
     test here
     '''
-    pass
+    try:
+        conn = connect()
+        cursor = conn.cursor()
+        cursor.execute("SHOW TABLES")
+        tables = [table[0] for table in cursor.fetchall()]
+
+        cursor.close()
+        conn.close()
+
+        print({"tables": tables})
+    except Exception as e:
+        print(e)
+
