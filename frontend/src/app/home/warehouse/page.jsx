@@ -30,6 +30,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { set } from "date-fns";
 
 export default function Warehouse(){
     const [warehouses, setWarehouses] = useState([]);
@@ -100,10 +101,10 @@ export default function Warehouse(){
                         </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-40" align="end">
-                            <DropdownMenuItem onSelect={() => console.log("Edit")}>
+                            <DropdownMenuItem onClick={() => console.log("Edit")}>
                             Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={() => console.log("Delete")}>
+                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setConfirmation(true); }}>
                             Delete
                             </DropdownMenuItem>
                         </DropdownMenuContent>
