@@ -5,7 +5,7 @@ def get_suppliers():
         conn = connect()
         cur = conn.cursor()
 
-        #print('\n[DEBUG] connected to database')
+        #print("\n[DEBUG] connected to database")
 
         query = """
             SELECT account_id, name, address, email, phone_number
@@ -13,18 +13,18 @@ def get_suppliers():
             WHERE account_type = 'supplier'
         """
 
-        #print('\n[DEBUG] running query:', query)
+        #print("\n[DEBUG] running query:", query)
 
         cur.execute(query)
         rows = cur.fetchall()
         conn.close()
 
-        #print('\n[DEBUG] query returned:', rows)
+        #print("\n[DEBUG] query returned:", rows)
 
         return {"status": "success", "data": rows}
         
     except Exception as e:
-        #print('\n[DEBUG] ERROR:', e)
+        #print("\n[DEBUG] ERROR:", e)
         return {"status": "error", "message": str(e)}
 
 def search_supplier(name='',address='',email=''):
@@ -32,7 +32,7 @@ def search_supplier(name='',address='',email=''):
         conn = connect()
         cur = conn.cursor()
 
-        #print('\n[DEBUG] connected to database')
+        #print("\n[DEBUG] connected to database")
 
         query = """
             SELECT account_id, name, address, email, phone_number
@@ -40,40 +40,40 @@ def search_supplier(name='',address='',email=''):
             WHERE account_type = 'supplier'
         """
 
-        #print('\n[DEBUG] running base query:', query)
+        #print("\n[DEBUG] running base query:", query)
 
         params = []
 
         if name:
             query += " AND name LIKE %s"
             params.append(f"%{name}%")
-            #print('\n[DEBUG] add name filter:', name)
+            #print("\n[DEBUG] add name filter:", name)
 
         if address:
             query += " AND address LIKE %s"
             params.append(f"%{address}%")
-            #print('\n[DEBUG] add address filter:', address)
+            #print("\n[DEBUG] add address filter:", address)
         
         if email:
             query += " AND email LIKE %s"
             params.append(f"%{email}%")
-            #print('\n[DEBUG] add email filter:', email)
+            #print("\n[DEBUG] add email filter:", email)
 
         cur.execute(query, params)
         rows = cur.fetchall()
         conn.close()
 
-        #print('\n[DEBUG] query returned:', rows)
+        #print("\n[DEBUG] query returned:", rows)
 
         return {"status": "success", "data": rows}
 
     except Exception as e:
-        #print('\n[DEBUG] ERROR:', repr(e))
+        #print("\n[DEBUG] ERROR:", repr(e))
         return {"status": "error", "message": str(e)}
     
 if __name__ == '__main__':
-    print('\n all suppliers:')
+    print("\n get suppliers:")
     print(get_suppliers())
 
-    print('\n search for suppliers:')
-    print(search_supplier(name='bob'))
+    print("\n search suppliers:")
+    print(search_supplier(name="bob"))
