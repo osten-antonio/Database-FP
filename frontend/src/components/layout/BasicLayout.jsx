@@ -25,6 +25,7 @@ import {
 import { Label } from "@/components/ui/label"
 
 
+
 function DataTable({data, columns, enableRowSelection, idName, setRowSelection, rowSelection}){
     const [pagination, setPagination] = useState({
         pageIndex: 0,

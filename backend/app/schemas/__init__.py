@@ -1,1 +1,1 @@
-print('hi')
+from .UserModel import UserLogin, UserResponse

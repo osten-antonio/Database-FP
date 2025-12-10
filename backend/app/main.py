@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 
-import os
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from .db import connect
@@ -36,5 +35,8 @@ def show_tables():
         return {"tables": tables}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="localhost", port=9000)
 
 

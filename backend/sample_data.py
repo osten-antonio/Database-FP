@@ -23,6 +23,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+
 @app.get("/orders")
 def get_order():
     orders=[

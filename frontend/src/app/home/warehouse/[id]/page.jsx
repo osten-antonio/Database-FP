@@ -36,12 +36,23 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { useRouter } from 'next/navigation';
-
+import { AddProduct } from '@/components/sections/warehouse/AddProduct';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { RestockOrderTable } from '@/components/sections/warehouse/RestockOrder'
 
 export default function InnerWarehouse(){
     const [customers, setCustomers] = useState([]);
     const [customerAddresses, setCAddresses] = useState([]);
-    const [create, setCreate] = useState(false);
+    const [add, setAdd] = useState(false);
     const [pagination, setPagination] = useState({
         pageIndex: 0,
         pageSize: 3,
@@ -146,6 +157,10 @@ export default function InnerWarehouse(){
             header: 'Price',
         },
         {
+            accessorKey: 'stock',
+            header: 'Stock',
+        },
+        {
             accessorKey: 'supplier_name',
             header: 'Supplier',
             cell: ({row})=>(<span>{row.original.supplier_name.length <= 10 ? row.original.supplier_name : `${row.original.supplier_name.slice(0, 7)}...`}</span>)
@@ -198,18 +213,19 @@ export default function InnerWarehouse(){
 
     return (
         <>
+            <AddProduct isOpen={add} setOpen={setAdd} restock={false} id={id} />
             <Breadcrumb className="my-2">
                 <BreadcrumbList>
                     <BreadcrumbItem>
-                        <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                        <BreadcrumbLink href="/home/">Home</BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        <BreadcrumbLink href='/warehouse'>Warehouse</BreadcrumbLink>
+                        <BreadcrumbLink href='/home/warehouse'>Warehouse</BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        <BreadcrumbPage href={`/warehouse/${id}`}>idk</BreadcrumbPage> {/* TODO */}
+                        <BreadcrumbPage href={`/home/warehouse/${id}`}>idk</BreadcrumbPage> {/* TODO */}
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
@@ -246,7 +262,7 @@ export default function InnerWarehouse(){
                         <div className="bg-secondary w-full h-full gap-1 flex flex-col flex-nowrap shadow-md shadow-accent-ui rounded-md p-2 px-4">
                             <div className="flex flex-row justify-between">
                                 <CardDescription className="text-text-dark font-black text-xl flex flex-row gap-2 items-center">Products</CardDescription>
-                                <Button className='shadow-xs shadow-accent-dark'>Add</Button>
+                                <Button onClick={() => setAdd(true)} className='shadow-xs shadow-accent-dark'>Add</Button>
                             </div>
                             <div className="overflow-hidden rounded-lg border-0 mt-2 shadow-md w-full shadow-accent-dark">
                             <Table>
@@ -287,6 +303,9 @@ export default function InnerWarehouse(){
                                                         </TableCell>
                                                         <TableCell className="text-text-dark text-[0.7rem] relative font-semibold after:content-[''] after:absolute after:right-0 after:top-2 after:bottom-2 after:w-px after:bg-primary">
                                                             Rp. {product.price}
+                                                        </TableCell>
+                                                        <TableCell className="text-text-dark text-[0.7rem] relative font-semibold after:content-[''] after:absolute after:right-0 after:top-2 after:bottom-2 after:w-px after:bg-primary">
+                                                            {product.stock}
                                                         </TableCell>
                                                         <TableCell className="text-text-dark text-[0.7rem] relative font-semibold after:content-[''] after:absolute after:right-0 after:top-2 after:bottom-2 after:w-px after:bg-primary">
                                                             {product.supplier_name}
@@ -492,6 +511,7 @@ export default function InnerWarehouse(){
                     </div>
                 </CardFooter>
             </Card>
+            <RestockOrderTable warehouseId={id} />
     </>
     )
 }

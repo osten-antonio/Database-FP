@@ -6,9 +6,26 @@ import { FilterWindow } from '@/components/sections/product/filter';
 import { BasicLayout } from '@/components/layout/BasicLayout';
 import { Button } from '@/components/ui/button';
 import { EllipsisVertical } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 export default function Products(){
     const [products,setProducts] = useState([]);
+    const [confirmation, setConfirmation] = useState(false);
 
     useEffect(()=>{
         async function getProducts(){
@@ -62,9 +79,21 @@ export default function Products(){
             header: "",
             cell: ({row})=>{                
                 return(
-                    <Button className='mx-0'>
-                        <EllipsisVertical />
-                    </Button>
+                    <DropdownMenu modal={false}>
+                        <DropdownMenuTrigger asChild>
+                        <Button className='mx-0'>
+                            <EllipsisVertical />
+                        </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-40" align="end">
+                            <DropdownMenuItem onSelect={() => console.log("Edit")}>
+                            Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => setConfirmation(true)}>
+                            Delete
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 )
             }
         }
@@ -81,6 +110,20 @@ export default function Products(){
     
     return (
         <>
+            <Dialog open={confirmation} onOpenChange={setConfirmation} >
+                <DialogContent className="[&~.fixed.inset-0]:bg-transparent">
+                    <DialogHeader>
+                    <DialogTitle className='text-text-dark'>Are you absolutely sure?</DialogTitle>
+                    <DialogDescription>
+                        This action cannot be undone. Are you sure you want to permanently
+                        delete this product from our servers?
+                    </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                    <Button type="submit">Confirm</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
             <BasicLayout name='Products' 
                 tableProps={tableProps} 
                 FilterWindow={FilterWindow} 

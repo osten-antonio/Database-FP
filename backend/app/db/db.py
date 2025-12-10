@@ -3,7 +3,8 @@ from ..core import settings
 
 def connect():
     conn = mysql.connector.connect(
-            host=settings.db_host,
+            host='localhost',
+            port=3307,
             user=settings.db_user,
             password=settings.db_password,
             database=settings.db
