@@ -6,6 +6,7 @@ from .db import connect
 
 app = FastAPI()
 
+
 @app.get("/test-db")
 def test_db_connection():
     try:
