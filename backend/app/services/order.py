@@ -6,7 +6,7 @@ def search_order(item='',customer_name='', address=''):
         cursor = conn.cursor()
         sql = """
             SELECT 
-                o.order_id, ol.amount, ol.order_price, 
+                o.order_id, p.product_name, ol.amount, ol.order_price, 
                 c.name, a.delivery_address, o.order_date, 
                 o.expected_delivery_date, o.is_delivered
             FROM `Order` o
@@ -59,7 +59,7 @@ def filter_order(
     try:
         sql = """
             SELECT 
-                o.order_id, ol.amount, ol.order_price, 
+                o.order_id, p.product_name, ol.amount, ol.order_price, 
                 c.name, a.delivery_address, o.order_date, 
                 o.expected_delivery_date, o.is_delivered
             FROM `Order` o
@@ -244,7 +244,7 @@ def get_order(limit=None):
 
         sql = '''
             SELECT 
-                o.order_id, ol.amount, ol.order_price, 
+                o.order_id, p.product_name, ol.amount, ol.order_price, 
                 c.name, a.delivery_address, o.order_date, 
                 o.expected_delivery_date, o.is_delivered
             FROM `Order` o
@@ -252,7 +252,7 @@ def get_order(limit=None):
             JOIN Customer c ON a.customer_id = c.customer_id
             JOIN OrderLine ol ON o.order_id = ol.order_id
             JOIN Product p ON ol.product_id = p.product_id
-            WHERE 1 = 1
+            ORDER BY o.order_id DESC
         '''
         if limit:
             sql += " LIMIT %s"

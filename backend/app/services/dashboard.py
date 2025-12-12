@@ -3,20 +3,37 @@ from ..db import connect
 def get_top_products_qty():
     try:
         conn = connect()
+        cursor = conn.cursor()
 
-        # TODO
-        
+        cursor.execute('''
+        SELECT COUNT(ol.product_id),p.product_name FROM OrderLine ol
+        JOIN Product p ON ol.product_id = p.product_id
+        GROUP BY ol.product_id
+        ORDER BY COUNT(product_id) DESC
+        LIMIT 5
+        ''')
+        res = cursor.fetchall()
+        cursor.close()
         conn.close()
+        return res
     except Exception as e:
         return {"status": "error", "message": str(e)}
     
 def get_top_products_money():
     try:
         conn = connect()
-
-        # TODO
-        
+        cursor = conn.cursor()
+        cursor.execute('''
+        SELECT SUM(ol.order_price),p.product_name FROM OrderLine ol
+        JOIN Product p ON ol.product_id = p.product_id
+        GROUP BY ol.product_id
+        ORDER BY SUM(ol.order_price) DESC
+        LIMIT 5
+        ''')
+        res = cursor.fetchall()
+        cursor.close()
         conn.close()
+        return res
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
@@ -30,11 +47,28 @@ def get_total_sales_card():
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-def get_total_sales_month(month):
+def get_total_sales_month():
     try:
         conn = connect()
 
         # TODO
+        
+        conn.close()
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+    
+def get_warehouse_stocks():
+    try:
+        conn = connect()
+        cursor = conn.cursor()
+        cursor.execute('''
+        SELECT w.name, SUM(i.stock) FROM Warehouse w
+        JOIN Inventory i ON w.warehouse_id = i.warehouse_id
+        GROUP BY i.warehouse_id
+        ORDER BY SUM(i.stock) DESCC
+        LIMIT 5
+        ''')
+        
         
         conn.close()
     except Exception as e:
