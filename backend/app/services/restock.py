@@ -60,6 +60,34 @@ def complete_order(restock_id):
     except Exception as e:
         raise e
     
+def get_restock_orders(warehouse_id):
+    try:
+        conn = connect()
+        cursor=conn.cursor()
+        cursor.execute('''
+            SELECT r.restock_id, p.product_name, a.name, r.amount, r.cost, r.order_date
+            FROM Restock r
+            JOIN Product p ON r.product_id = p.product_id
+            JOIN Account a ON p.account_id = a.account_id
+            WHERE r.warehouse_id = %s
+        ''', (warehouse_id,))
+        rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        res = []
+        for row in rows:
+            res.append({
+                'id':row[0],
+                'product_name':row[1],
+                'supplier_name':row[2],
+                'amount':row[3],
+                'cost':row[4],
+                'order_date':row[5]
+            })
+        return res
+    except Exception as e:
+        raise e
+
 if __name__ == '__main__':
     '''
     test here
