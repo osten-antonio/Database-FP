@@ -9,20 +9,30 @@ def get_warehouse():
         conn = connect()
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT w.warehouse_id,w.name, w.address, a.name, SUM(i.stock), COUNT(o.order_id)
+            SELECT w.warehouse_id,w.name, w.address, a.name, SUM(i.stock), SUM(ol.order_price)
             FROM Warehouse w
             JOIN Account a ON w.account_id = a.account_id
             JOIN Inventory i ON w.warehouse_id = i.warehouse_id
             JOIN Order o ON i.warehouse_id = o.warehouse_id
+            JOIN OrderLine ol on o.order_id = ol.order_id
             GROUP BY w.name, w.address, a.name
         ''')
 
-        result = cursor.fetchall()
+        rows = cursor.fetchall()
         cursor.close()
         conn.close()
-        return {"status":"success","data":result}
+        result = []
+        for row in rows:
+            result.append({
+                'id':row[0],
+                'name':row[1],
+                'address': row[2],
+                'stock': row[3],
+                'total_sales': row[4]
+            })
+        return result
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        raise e
 
 def create_warehouse(name,address,manager_id):
     try:
@@ -38,7 +48,7 @@ def create_warehouse(name,address,manager_id):
         
         conn.close()
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        raise e
 
 def edit_warehouse(id, name,address,manager):
     try:
@@ -55,7 +65,7 @@ def edit_warehouse(id, name,address,manager):
 
         conn.close()
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        raise e
     
 def get_warehouse_products(id,limit=None):
     try:
@@ -76,12 +86,23 @@ def get_warehouse_products(id,limit=None):
             params.append(limit)
         cursor = conn.cursor()
         cursor.execute(sql,params)
-        result = cursor.fetchall()
+        rows = cursor.fetchall()
         cursor.close()
         conn.close()
-        return {"status":"success","data":result}
+        result = []
+        for row in rows:
+            result.append({
+                'id':row[0],
+                'name':row[1],
+                'category_id': row[2],
+                'supplier': row[3],
+                'cost': row[4],
+                'stock': row[5],
+                'ttl_sales':row[6]
+            })
+        return result
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        raise e
 
 
 def filter_warehouse_product(id, min_cost=0,max_cost=float('inf'),suppliers=[],category=[]):
@@ -109,12 +130,23 @@ def filter_warehouse_product(id, min_cost=0,max_cost=float('inf'),suppliers=[],c
             sql += f" AND p.category_id IN ({placeholders})"
             params.extend(category)
         cursor.execute(sql,params)
-        result = cursor.fetchall()
+        rows = cursor.fetchall()
         cursor.close()
         conn.close()
-        return {"status":"success","data":result}
+        result = []
+        for row in rows:
+            result.append({
+                'id':row[0],
+                'name':row[1],
+                'category_id': row[2],
+                'supplier': row[3],
+                'cost': row[4],
+                'stock': row[5],
+                'ttl_sales':row[6]
+            })
+        return result
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        raise e
 
 def get_warehouse_customer(id):
     try:
@@ -131,12 +163,22 @@ def get_warehouse_customer(id):
                        WHERE warehouse_id = %s
                        )
         ''',(id))
-        result = cursor.fetchall()
+        rows = cursor.fetchall()
         cursor.close()
         conn.close()
-        return {"status":"success","data":result}
+        result = []
+        for row in rows:
+            result.append({
+                'id':row[0],
+                'name':row[1],
+                'email': row[2],
+                'address_id': row[3],
+                'address': row[4],
+                'phone_num': row[5],
+            })
+        return result
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        raise e
 
 def search_warehouse(name):
     try:
@@ -152,12 +194,21 @@ def search_warehouse(name):
             WHERE w.name LIKE %s
         ''',(f'%{name}%',))
 
-        result = cursor.fetchall()
+        rows = cursor.fetchall()
         cursor.close()
         conn.close()
-        return {"status":"success","data":result}
+        result = []
+        for row in rows:
+            result.append({
+                'id':row[0],
+                'name':row[1],
+                'address': row[2],
+                'stock': row[3],
+                'total_sales': row[4]
+            })
+        return result
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        raise e
 
 if __name__ == '__main__':
     '''

@@ -12,8 +12,8 @@ def add_stock(product_id,warehouse_id,amount,cost,date):
         cursor.close()
         conn.close()
     except Exception as e:
-        return {"status": "error", "message": str(e)}
-
+        raise e
+    
 def complete_order(restock_id):
     try:
         conn = connect()
@@ -58,7 +58,7 @@ def complete_order(restock_id):
         cursor.close()
         conn.close()
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        raise e
     
 if __name__ == '__main__':
     '''

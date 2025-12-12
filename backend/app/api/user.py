@@ -12,7 +12,7 @@ router = APIRouter(prefix="/user",
 async def login_route(payload: UserLogin):
     try:
         info = login_user(payload.email, payload.password)
-
+    
         return info
     except HTTPException as e:
         raise e

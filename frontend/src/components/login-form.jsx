@@ -1,3 +1,4 @@
+'use client'
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -14,11 +15,32 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import api from '@/lib/axios'
+import { useToken } from "@/app/context/TokenContext"
+import { useEffect, useState } from "react"
 
 export function LoginForm({
   className,
   ...props
 }) {
+  const { setToken } = useToken()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState(undefined)
+  const validateLogin = async () => {
+    try{
+      const res = await api.post('/user',{email,password})
+        if(res.status>=200 && res.status <=300){
+            const data = res.data
+            setToken(data["access_token"])
+        } else{
+          setError(e)
+        }
+    } catch(e){
+      setError(e)
+    }
+    
+  }
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -33,21 +55,17 @@ export function LoginForm({
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
-                <Input id="email" type="email" placeholder="m@example.com" required />
+                <Input onChange={(e)=>{setEmail(e.value.target)}} id="email" type="email" placeholder="m@example.com" required />
               </Field>
               <Field>
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <a
-                    href="#"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline">
-                    Forgot your password?
-                  </a>
                 </div>
-                <Input id="password" type="password" required />
+                <Input onChange={(e)=>{setPassword(e.value.target)}} id="password" type="password" required />
               </Field>
               <Field>
-                <Button type="submit">Login</Button>
+                <p className="text-red-500">{error}</p>
+                <Button type="submit" >Login</Button>
               </Field>
             </FieldGroup>
           </form>

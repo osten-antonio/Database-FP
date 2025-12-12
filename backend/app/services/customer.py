@@ -68,12 +68,11 @@ def add_customer(name,email,addresses=[]):
         conn.commit()
         cursor.close()
        
-        # TODO
         
         conn.close()
-        return {"status": "success", "message": "Customer added successfully.", "customer_id": customer_id}
+        return customer_id
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        raise e
 
 def edit_customer(id, name,email,addresses=[]):
     try:
@@ -88,12 +87,10 @@ def edit_customer(id, name,email,addresses=[]):
             )
         conn.commit()
         cursor.close()
-        # TODO
-        
+
         conn.close()
-        return {"status": "success", "message": "Customer updated successfully."}
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        raise e
 
 if __name__ == '__main__':
     '''

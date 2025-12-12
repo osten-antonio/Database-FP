@@ -46,9 +46,9 @@ def search_order(item='',customer_name='', address=''):
         cursor.close()
         conn.close()
 
-        return {"status": "ok", "result": formatted_result}
+        return formatted_result
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        raise e
 
 def filter_order(
         order_date=None,deliver_date=None,
@@ -122,7 +122,7 @@ def filter_order(
 
         conn.close()
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        raise e
     
 def delete_order(order_id,product_id):
     try:
@@ -142,13 +142,7 @@ def delete_order(order_id,product_id):
     except Exception as e:
         if conn:
             conn.rollback()
-        return {"status": "error", "message": str(e)}
-
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+        raise e
     
 def create_order(
         warehouse_id,address_id,order_date,delivery_date,items=[]
@@ -185,13 +179,7 @@ def create_order(
     except Exception as e:
         if conn:
             conn.rollback()
-        return {"status": "error", "message": str(e)}
-
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+        raise e
 
 def edit_order(
         order_id,warehouse_id,address_id,order_date,delivery_date,item_ids=[],items=[]
@@ -227,13 +215,9 @@ def edit_order(
     except Exception as e:
         if conn:
             conn.rollback()
-        return {"status": "error", "message": str(e)}
+        raise e
 
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
+
 
 def get_order(limit=None):
     '''
@@ -273,9 +257,9 @@ def get_order(limit=None):
             })
         cursor.close()
         conn.close()
-        return {"status": "ok", "result": formatted_result}
+        return formatted_result
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        raise e
 
 if __name__ == '__main__':
     # print('--')

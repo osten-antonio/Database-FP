@@ -12,12 +12,18 @@ def get_top_products_qty():
         ORDER BY COUNT(product_id) DESC
         LIMIT 5
         ''')
-        res = cursor.fetchall()
+        rows = cursor.fetchall()
+        res = []
+        for row in rows:
+            res.append({
+              'count':row[0],
+              'name':row[1]  
+            })
         cursor.close()
         conn.close()
         return res
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        raise e
     
 def get_top_products_money():
     try:
@@ -30,12 +36,18 @@ def get_top_products_money():
         ORDER BY SUM(ol.order_price) DESC
         LIMIT 5
         ''')
-        res = cursor.fetchall()
+        rows = cursor.fetchall()
+        res = []
+        for row in rows:
+            res.append({
+                'total':row[0],
+                'name':row[1]
+            })
         cursor.close()
         conn.close()
         return res
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        raise e
 
 def get_total_sales_card():
     try:
@@ -69,10 +81,17 @@ def get_warehouse_stocks():
         LIMIT 5
         ''')
         
-        
+        result = []
+        rows = cursor.fetchall()
+        for row in rows:
+            result.append({
+                'name':row[0],
+                'stock':row[1]
+            })
+        cursor.close()
         conn.close()
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        raise e
     
 if __name__ == '__main__':
     '''

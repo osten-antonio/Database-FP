@@ -18,9 +18,9 @@ def get_categories():
 
         cursor.close()
         conn.close()
-        return {"status": "success", "data": result}
+        return result
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        raise e
     
 def insert_categories(name,bg='#FFFFFF',text='#000000'):
     try:
@@ -29,11 +29,11 @@ def insert_categories(name,bg='#FFFFFF',text='#000000'):
         cursor.execute("INSERT INTO categories (name, bg_color, text_color) VALUES (%s, %s, %s)", (name,bg,text))
         conn.commit()
         cursor.close()
-        return {"status": "success", "message": "Category inserted successfully."}
         conn.close()
+        
     except Exception as e:
-        return {"status": "error", "message": str(e)}
-
+        raise e
+    
 if __name__ == '__main__':
     # py -m uv run -m app.services.category
     '''
