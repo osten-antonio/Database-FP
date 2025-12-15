@@ -65,7 +65,7 @@ export default function InnerWarehouse(){
     useEffect(()=>{
         async function getCustomers(){
             try {
-                const res = await api.get("/customers");
+                const res = await api.get("/customer");
                 if (res.status >= 200 && res.status <= 300) {
                     setCustomers(res.data);
                 }
@@ -75,7 +75,7 @@ export default function InnerWarehouse(){
         }
         async function getProducts(){
             try {
-                const res = await api.get("/products");
+                const res = await api.get("/product");
                 if (res.status >= 200 && res.status <= 300) {
                     setProducts(res.data.slice(0,5));
                 }

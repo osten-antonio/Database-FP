@@ -33,7 +33,7 @@ export function FilterWindow({isOpen, setOpen, filters = {}, setFilters}){
     useEffect(()=>{
         async function getWarehouses(){
             try {
-                const res = await api.get("/warehouses");
+                const res = await api.get("/warehouse");
                 if (res.status >= 200 && res.status <= 300) {
                     setAvailableWarehouses(res.data);
                 }
@@ -43,7 +43,7 @@ export function FilterWindow({isOpen, setOpen, filters = {}, setFilters}){
         }
         async function getSupplier(){
             try {
-                const res = await api.get("/suppliers");
+                const res = await api.get("/supplier");
                 if (res.status >= 200 && res.status <= 300) {
                     setAvailableSuppliers(res.data);
                 }

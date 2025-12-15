@@ -22,25 +22,67 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Input } from '@/components/ui/input';
 
 export default function Products(){
-    const [products,setProducts] = useState([]);
+    const [products, setProducts] = useState([]);
     const [confirmation, setConfirmation] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [createOpen, setCreateOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isEditing, setIsEditing] = useState(false);
 
-    useEffect(()=>{
-        async function getProducts(){
-            try {
-                const res = await api.get("/products");
-                if (res.status >= 200 && res.status <= 300) {
-                    setProducts(res.data);
-                }
-            } catch (err) {
-                console.error(err);
+    const fetchProducts = async (query = '') => {
+        try {
+            const endpoint = query ? `/product/search?name=${query}` : '/product';
+            const res = await api.get(endpoint);
+            if (res.status >= 200 && res.status <= 300) {
+                setProducts(res.data || []);
             }
+        } catch (err) {
+            console.error("Failed to fetch products:", err);
         }
-        getProducts();
-    },[]);
+    };
 
+    useEffect(() => {
+        fetchProducts();
+    }, []);
+
+    const handleSearch = (query) => {
+        setSearchQuery(query);
+        fetchProducts(query);
+    };
+
+    const handleCreate = async (formData) => {
+        try {
+            await api.post("/product", formData);
+            await fetchProducts(searchQuery);
+        } catch (err) {
+            console.error("Failed to create product:", err);
+        }
+    };
+
+    const handleEdit = async (formData) => {
+        try {
+            await api.put(`/product/${selectedProduct.id}`, formData);
+            await fetchProducts(searchQuery);
+            setIsEditing(false);
+            setSelectedProduct(null);
+        } catch (err) {
+            console.error("Failed to edit product:", err);
+        }
+    };
+
+    const handleDelete = async () => {
+        try {
+            await api.delete(`/product/${selectedProduct.id}`);
+            await fetchProducts(searchQuery);
+            setConfirmation(false);
+            setSelectedProduct(null);
+        } catch (err) {
+            console.error("Failed to delete product:", err);
+        }
+    };
 
     const columns = [
         {
@@ -72,7 +114,6 @@ export default function Products(){
         {
             accessorKey: "category_id",
             header: "Category",
-            // TODO cell:
         },
         {
             accessorKey: "actions",
@@ -86,11 +127,21 @@ export default function Products(){
                         </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-40" align="end">
-                            <DropdownMenuItem onSelect={() => console.log("Edit")}>
-                            Edit
+                        <DropdownMenuItem onClick={() => { 
+                            setSelectedProduct({
+                                ...row.original,
+                                id: row.getValue("id"), 
+                            }); 
+                            setIsEditing(true); 
+                        }}>
+
+                                Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={() => setConfirmation(true)}>
-                            Delete
+                            <DropdownMenuItem onClick={() => {
+                                setSelectedProduct(row.original);
+                                setConfirmation(true);
+                            }}>
+                                Delete
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -100,13 +151,22 @@ export default function Products(){
     ];
 
     const tableProps = {
-        data:products,
+        data: products,
         enableRowSelection: false,
-        idName: 'order_id',
+        idName: 'id',
         columns,
-        setRowSelection:undefined,
-        rowSelection:undefined
+        setRowSelection: undefined,
+        rowSelection: undefined
     }
+
+    const CustomCreateWindow = (props) => (
+        <CreateWindow 
+            isOpen={isEditing | createOpen}
+            setOpen={isEditing ? setIsEditing : setCreateOpen}
+            onSubmit={isEditing ? handleEdit : handleCreate}
+            editData={isEditing ? selectedProduct : null}
+        />
+    );
     
     return (
         <>
@@ -120,15 +180,19 @@ export default function Products(){
                     </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
-                    <Button type="submit">Confirm</Button>
+                    <Button variant="outline" onClick={() => setConfirmation(false)}>Cancel</Button>
+                    <Button onClick={handleDelete} className='bg-red-600 hover:bg-red-700'>Confirm Delete</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-            <BasicLayout name='Products' 
-                tableProps={tableProps} 
-                FilterWindow={FilterWindow} 
-                CreateWindow={CreateWindow}
-            />
+
+                <BasicLayout 
+                    name='Products' 
+                    tableProps={tableProps} 
+                    FilterWindow={FilterWindow} 
+                    CreateWindow={CustomCreateWindow}
+                    onSearch={handleSearch}
+                />
         </>
     )
 }

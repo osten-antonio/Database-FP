@@ -53,20 +53,63 @@ export default function Customers(){
     });
     const [expandedRows, setExpandedRows] = useState(new Set());
     const [confirmation, setConfirmation] = useState(false);
+    const [selectedCustomer, setSelectedCustomer] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
-    useEffect(()=>{
-        async function getCustomers(){
-            try {
-                const res = await api.get("/customers");
-                if (res.status >= 200 && res.status <= 300) {
-                    setCustomers(res.data);
-                }
-            } catch (err) {
-                console.error(err);
+    const fetchCustomers = async (query = '') => {
+        try {
+            const endpoint = query ? `/customer/search?name=${query}` : '/customer';
+            const res = await api.get(endpoint);
+            if (res.status >= 200 && res.status <= 300) {
+                setCustomers(res.data.data || res.data);
             }
+        } catch (err) {
+            console.error("Failed to fetch customers:", err);
         }
-        getCustomers();
-    },[]);
+    };
+
+    useEffect(() => {
+        fetchCustomers();
+    }, []);
+
+    const handleSearch = (query) => {
+        setSearchQuery(query);
+        fetchCustomers(query);
+    };
+
+    const handleCreate = async (formData) => {
+        try {
+            await api.post("/customer", formData);
+            await fetchCustomers(searchQuery);
+            setCreate(false);
+        } catch (err) {
+            console.error("Failed to create customer:", err);
+        }
+    };
+
+    const handleEdit = async (formData) => {
+        try {
+            await api.put(`/customer/${selectedCustomer.customer_id}`, formData);
+            await fetchCustomers(searchQuery);
+            setCreate(false);
+            setIsEditing(false);
+            setSelectedCustomer(null);
+        } catch (err) {
+            console.error("Failed to edit customer:", err);
+        }
+    };
+
+    const handleDelete = async () => {
+        try {
+            await api.delete(`/customer/${selectedCustomer.customer_id}`);
+            await fetchCustomers(searchQuery);
+            setConfirmation(false);
+            setSelectedCustomer(null);
+        } catch (err) {
+            console.error("Failed to delete customer:", err);
+        }
+    };
 
 
     const cTableData = useMemo(() => {
@@ -152,28 +195,42 @@ export default function Customers(){
                     </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
-                    <Button type="submit">Confirm</Button>
+                    <Button variant="outline" onClick={() => setConfirmation(false)}>Cancel</Button>
+                    <Button onClick={handleDelete} className='bg-red-600 hover:bg-red-700'>Confirm Delete</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog> 
             
             <div className="p-6 pl-10 w-screen xl:ml-auto xl:w-6/7 2xl:w-8/9 mt-12">      
 
-                <CreateWindow isOpen={create} setOpen={setCreate} />   
+                <CreateWindow 
+                    isOpen={create} 
+                    setOpen={setCreate}
+                    onSubmit={isEditing ? handleEdit : handleCreate}
+                    editData={isEditing ? selectedCustomer : null}
+                />   
                 <h1 className='text-text-dark text-3xl font-bold mb-4'>
                     Customer
                 </h1>
                     <div className='flex flex-row flex-wrap justify-between gap-2 w-full'>
                     <button 
-                        onClick={()=>{setCreate(true)}}
+                        onClick={() => {
+                            setIsEditing(false);
+                            setSelectedCustomer(null);
+                            setCreate(true);
+                        }}
                         className='bg-primary p-2 px-10 rounded-lg text-text-light font-semibold shadow-md shadow-accent-dark'
                     >
                         Create
                     </button>
                     <div className='w-lg flex flex-row gap-2'>
-                        <form className='w-full min-w-[250px] grow'>
-                            <input type='text' className='bg-primary-light h-full w-full rounded-md text-text-light px-2 shadow-md shadow-accent-dark' placeholder='Search'/>
-                        </form>
+                        <input 
+                            type='text' 
+                            className='bg-primary-light h-full w-full min-w-[250px] grow rounded-md text-text-light px-2 shadow-md shadow-accent-dark' 
+                            placeholder='Search'
+                            value={searchQuery}
+                            onChange={(e) => handleSearch(e.target.value)}
+                        />
                     </div>
                     <div className="overflow-hidden rounded-lg border-0 mt-5 shadow-md w-full shadow-accent-dark">
                         <Table>
@@ -232,11 +289,18 @@ export default function Customers(){
                                                             </DropdownMenuTrigger>
 
                                                             <DropdownMenuContent className="w-40" align="end">
-                                                                <DropdownMenuItem onClick={() => console.log("Edit")}>
+                                                                <DropdownMenuItem onClick={() => {
+                                                                    setSelectedCustomer(customer);
+                                                                    setIsEditing(true);
+                                                                    setCreate(true);
+                                                                }}>
                                                                 Edit
                                                                 </DropdownMenuItem>
 
-                                                                <DropdownMenuItem onClick={() => setConfirmation(true)}>
+                                                                <DropdownMenuItem onClick={() => {
+                                                                    setSelectedCustomer(customer);
+                                                                    setConfirmation(true);
+                                                                }}>
                                                                 Delete
                                                                 </DropdownMenuItem>
                                                             </DropdownMenuContent>

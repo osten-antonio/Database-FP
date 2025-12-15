@@ -2,13 +2,12 @@ from ..db import connect
 from ..core import hash_password, verify_password, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, oauth2_scheme, decode_access_token
 from fastapi import HTTPException, status, Depends, Request
 from datetime import timedelta
-from ..schemas import UserCreate
 
 def get_user(email: str):
     try:
         conn = connect()
         cursor = conn.cursor()
-        cursor.execute("SELECT id, name, password, account_type FROM account WHERE email = %s", (email,))
+        cursor.execute("SELECT account_id, name, password, account_type FROM Account WHERE email = %s", (email,))
         row = cursor.fetchone()
         cursor.close()
         if row:
@@ -19,7 +18,6 @@ def get_user(email: str):
 
 def login_user(email: str, password: str):
     user = get_user(email)
-
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

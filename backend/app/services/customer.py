@@ -10,15 +10,32 @@ def get_customers():
                    a.address_id, a.delivery_address, a.phone_num
             FROM Customer c
             LEFT JOIN Address a ON c.customer_id = a.customer_id
+            ORDER BY c.customer_id, a.address_id
         """
         cursor.execute(query)
         rows = cursor.fetchall()
-
-
-        # TODO
-        
         conn.close()
-        return {"status": "success", "data": rows}  
+
+        # Nest addresses by customer_id
+        customers_dict = {}
+        for row in rows:
+            cid = row['customer_id']
+            if cid not in customers_dict:
+                customers_dict[cid] = {
+                    'customer_id': cid,
+                    'name': row['name'],
+                    'email': row['email'],
+                    'addresses': []
+                }
+            if row['address_id']:
+                customers_dict[cid]['addresses'].append({
+                    'address_id': row['address_id'],
+                    'delivery_address': row['delivery_address'],
+                    'phone_num': row['phone_num']
+                })
+
+        return list(customers_dict.values())
+
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
@@ -35,6 +52,7 @@ def search_customers(name='',address='',email='',phone=''):
               AND (%s = '' OR c.email LIKE %s)
               AND (%s = '' OR a.delivery_address LIKE %s)
               AND (%s = '' OR a.phone_num LIKE %s)
+            ORDER BY c.customer_id, a.address_id
         """
         params =  (
             name, f'%{name}%',
@@ -45,10 +63,28 @@ def search_customers(name='',address='',email='',phone=''):
         cursor.execute(query, params)
         rows = cursor.fetchall()
         cursor.close()
-        # TODO
-        
         conn.close()
-        return{"status": "success", "data": rows}
+
+        # Nest addresses by customer_id
+        customers_dict = {}
+        for row in rows:
+            cid = row['customer_id']
+            if cid not in customers_dict:
+                customers_dict[cid] = {
+                    'customer_id': cid,
+                    'name': row['name'],
+                    'email': row['email'],
+                    'addresses': []
+                }
+            if row['address_id']:
+                customers_dict[cid]['addresses'].append({
+                    'address_id': row['address_id'],
+                    'delivery_address': row['delivery_address'],
+                    'phone_num': row['phone_num']
+                })
+
+        return list(customers_dict.values())
+
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
@@ -89,6 +125,26 @@ def edit_customer(id, name,email,addresses=[]):
         cursor.close()
 
         conn.close()
+    except Exception as e:
+        raise e
+
+def get_customer_addresses(customer_id):
+    """Get all addresses for a specific customer"""
+    try:
+        conn = connect()
+        cursor = conn.cursor(dictionary=True)
+        query = """
+            SELECT address_id, delivery_address, phone_num
+            FROM Address
+            WHERE customer_id = %s
+            ORDER BY address_id
+        """
+        cursor.execute(query, (customer_id,))
+        addresses = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        
+        return addresses if addresses else []
     except Exception as e:
         raise e
 

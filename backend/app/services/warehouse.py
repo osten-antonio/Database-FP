@@ -7,30 +7,18 @@ def get_warehouse_specific(id):
 def get_warehouse():
     try:
         conn = connect()
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionary=True)
         cursor.execute('''
-            SELECT w.warehouse_id,w.name, w.address, a.name, SUM(i.stock), SUM(ol.order_price)
+            SELECT DISTINCT w.warehouse_id, w.name, w.address
             FROM Warehouse w
-            JOIN Account a ON w.account_id = a.account_id
-            JOIN Inventory i ON w.warehouse_id = i.warehouse_id
-            JOIN Order o ON i.warehouse_id = o.warehouse_id
-            JOIN OrderLine ol on o.order_id = ol.order_id
-            GROUP BY w.name, w.address, a.name
         ''')
 
         rows = cursor.fetchall()
         cursor.close()
         conn.close()
-        result = []
-        for row in rows:
-            result.append({
-                'id':row[0],
-                'name':row[1],
-                'address': row[2],
-                'stock': row[3],
-                'total_sales': row[4]
-            })
-        return result
+        
+        return rows
+
     except Exception as e:
         raise e
 
@@ -73,13 +61,15 @@ def get_warehouse_products(id,limit=None):
 
         params = [id]
         sql = '''
-            SELECT i.product_id, p.name, p.category_id, a.name, p.cost, i.stock, COUNT(ol.order_id)
+            SELECT i.product_id, p.product_name, p.category_id, a.name, p.price, i.stock, COUNT(ol.order_id)
             FROM Inventory i
             JOIN Product p ON i.product_id = p.product_id
             JOIN Warehouse w ON i.warehouse_id = w.warehouse_id
             JOIN `Order` o ON o.warehouse_id = w.warehouse_id
             JOIN OrderLine ol ON o.order_id = ol.order_id
+            JOIN Account a on p.account_id = a.account_id
             WHERE i.warehouse_id=%s
+            GROUP BY i.product_id, p.product_name, p.category_id, a.name, p.price, i.stock
         '''
         if limit:
             sql+=' LIMIT %s'
@@ -102,6 +92,7 @@ def get_warehouse_products(id,limit=None):
             })
         return result
     except Exception as e:
+        print(e)
         raise e
 
 
@@ -148,7 +139,22 @@ def filter_warehouse_product(id, min_cost=0,max_cost=float('inf'),suppliers=[],c
     except Exception as e:
         raise e
 
-def get_warehouse_customer(id):
+def delete_warehouse(id):
+    try:
+        conn = connect()
+
+        cursor = conn.cursor()
+        cursor.execute('''
+            DELETE FROM Warehouse WHERE warehouse_id=%s
+        ''', (id,))
+        conn.commit()
+        cursor.close()
+
+        conn.close()
+    except Exception as e:
+        raise e
+    
+
     try:
         conn = connect()
 

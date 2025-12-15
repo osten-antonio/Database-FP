@@ -10,3 +10,7 @@ class UserResponse(BaseModel):
     role:str
     access_token: str
     token_type: str
+
+class ErrorResponse(BaseModel):
+    detail: str
+

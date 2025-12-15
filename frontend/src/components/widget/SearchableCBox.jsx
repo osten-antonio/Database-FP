@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -19,12 +19,24 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-export function SearchableCBox({name, list, setSelected}) {
+export function SearchableCBox({name, list, setSelected, value: externalValue}) {
     /*
     list = [{value:str, label:str},...]
     */
     const [open, setOpen] = useState(false)
-    const [value, setValue] = useState("")
+    const [value, setValue] = useState(externalValue || "")
+
+    // Sync internal value with external value
+    useEffect(() => {
+        setValue(externalValue || "")
+    }, [externalValue])
+
+    const handleSelect = (currentValue) => {
+        const newValue = currentValue === value ? "" : currentValue
+        setValue(newValue)
+        setSelected(newValue)
+        setOpen(false)
+    }
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -51,10 +63,7 @@ export function SearchableCBox({name, list, setSelected}) {
                     <CommandItem
                     key={i.value}
                     value={i.value}
-                    onSelect={(currentValue) => {
-                        setValue(currentValue === value ? "" : currentValue)
-                        setOpen(false)
-                    }}
+                    onSelect={handleSelect}
                     >
                     {i.label}
                     <Check

@@ -189,14 +189,12 @@ function DataTable({data, columns, enableRowSelection, idName, setRowSelection, 
 
 
 
-function BasicLayout({name, tableProps, FilterWindow, CreateWindow}){
-    const [isFilter, setFilter] = useState(false);
-    const [filters, setFilters] = useState(undefined);
+function BasicLayout({name, tableProps, FilterWindow, CreateWindow, onSearch, onFilter, onCreateClick}){
     const [isCreate, setCreate] = useState(false);
+    const [searchInput, setSearchInput] = useState('');
     
     return(
         <div className="p-6 pl-10 w-screen xl:ml-auto xl:w-6/7 2xl:w-8/9 mt-12">          
-            <FilterWindow isOpen={isFilter} setOpen={setFilter} filters={filters} setFilters={setFilters}/>
             <CreateWindow isOpen={isCreate} setOpen={setCreate}/>
 
             <h1 className='text-text-dark text-3xl font-bold mb-4'>
@@ -204,17 +202,32 @@ function BasicLayout({name, tableProps, FilterWindow, CreateWindow}){
             </h1>
             <div className='flex flex-row flex-wrap justify-between gap-2 w-full'>
                 <button 
-                    onClick={()=>{setCreate(true)}}
+                    onClick={()=>{
+                        if (onCreateClick) {
+                            onCreateClick();
+                        } else {
+                            setCreate(true);
+                        }
+                    }}
                     className='bg-primary p-2 px-10 rounded-lg text-text-light font-semibold shadow-md shadow-accent-dark'
                 >
                     Create
                 </button>
                 <div className='w-xl flex flex-row gap-2'>
-                    <form className='w-full min-w-[250px] grow'>
-                        <input type='text' className='bg-primary-light h-full w-full rounded-md text-text-light px-2 shadow-md shadow-accent-dark' placeholder='Search'/>
-                    </form>
+                    <input 
+                        type='text' 
+                        className='bg-primary-light h-full w-full min-w-[250px] grow rounded-md text-text-light px-2 shadow-md shadow-accent-dark' 
+                        placeholder='Search'
+                        value={searchInput}
+                        onChange={(e) => {
+                            setSearchInput(e.target.value);
+                            if (onSearch) {
+                                onSearch(e.target.value);
+                            }
+                        }}
+                    />
                     <button 
-                        onClick={()=>{setFilter(true)}}
+                        onClick={()=>{if (onFilter) onFilter()}}
                         className='shadow-md shadow-accent-dark flex flex-nowrap gap-2 bg-primary p-2 px-5 rounded-lg text-text-light font-semibold'
                     >
                         <ListFilter/>

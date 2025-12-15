@@ -45,7 +45,7 @@ export default function Products(){
     useEffect(()=>{
         async function getProducts(){
             try {
-                const res = await api.get("/products");
+                const res = await api.get("/product");
                 if (res.status >= 200 && res.status <= 300) {
                     setProducts(res.data);
                 }

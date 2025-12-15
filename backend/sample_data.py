@@ -330,5 +330,5 @@ def get_warehouses():
     
     ]
 
-if __name__ == "__main__":
-    uvicorn.run("sample_data:app", host="0.0.0.0", port=6767, reload=True)
+# if __name__ == "__main__":
+#     uvicorn.run("sample_data:app", host="0.0.0.0", port=6767, reload=True)

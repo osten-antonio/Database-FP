@@ -99,15 +99,39 @@ function AddressTable({addresses, setAddresses}){
     )
 }
 
-export function CreateWindow({isOpen, setOpen}){ 
-    const [price, setPrice] = useState();
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [address, setAddress] = useState('Address');
+export function CreateWindow({isOpen, setOpen, onSubmit, editData = null}){ 
+    const [name, setName] = useState(editData?.name || '');
+    const [address, setAddress] = useState(editData?.address || '');
+    const [loading, setLoading] = useState(false);
 
-    const handleAdd = (address)=>{
-        setAddress(address);
-    }
+    useEffect(() => {
+        if (editData) {
+            setName(editData.name || '');
+            setAddress(editData.address || '');
+        } else {
+            setName('');
+            setAddress('');
+        }
+    }, [editData, isOpen]);
+
+    const handleAdd = (selectedAddress) => {
+        setAddress(selectedAddress);
+    };
+
+    const handleSubmit = async () => {
+        setLoading(true);
+        try {
+            await onSubmit({
+                name: name,
+                address: address
+            });
+        } catch (err) {
+            console.error("Failed to submit:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return(
         <div
             onClick={() => setOpen(false)}
@@ -118,13 +142,14 @@ export function CreateWindow({isOpen, setOpen}){
             `}
         >            
             <div onClick={(e) => e.stopPropagation()} className='flex flex-col bg-primary-light max-w-[500px] rounded-2xl p-5 shadow-md shadow-accent-dark border-primary-dark border-2'>
-                <p className="font-bold text-2md text-text">New warehouse</p>
+                <p className="font-bold text-2md text-text">{editData ? 'Edit Warehouse' : 'New Warehouse'}</p>
                 <span className="ml-1">
                     <div className="w-full flex flex-row gap-3">
                         <div className="flex flex-col flex-nowrap gap-1">
                             <p className="font-semibold text-sm mt-2 text-text-light">Warehouse name</p>
                             <input 
                                 placeholder="Name"
+                                value={name}
                                 className='bg-secondary py-1 h-full w-full rounded-md text-text-dark px-2' 
                                 onInput={(e)=>(setName(e.target.value))}
                             />
@@ -141,13 +166,12 @@ export function CreateWindow({isOpen, setOpen}){
                     </div>
                     <div className="flex flex-row flex-nowrap justify-between mt-3">
                         <Button onClick={()=>{setOpen(false)}} className='shadow-sm bg-accent-light border-primary-dark border text-text-dark hover:bg-accent-dark transition-color duration-200 ease-in-out'>Close</Button>
-                        <Button className='shadow-sm hover:bg-accent-dark transition-colors duration-200 ease-in-out'
-                            onClick={() => {
-                                // TODO 
-                                setOpen(false);
-                            }}
+                        <Button 
+                            className='shadow-sm hover:bg-accent-dark transition-colors duration-200 ease-in-out'
+                            disabled={loading}
+                            onClick={handleSubmit}
                         >
-                                Create
+                                {editData ? 'Update' : 'Create'}
                         </Button>
                     </div>   
                 </span>       

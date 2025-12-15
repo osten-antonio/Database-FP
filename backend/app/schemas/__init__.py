@@ -1,1 +1,1 @@
-from .UserModel import UserLogin, UserResponse
+from .UserModel import UserLogin, UserResponse, ErrorResponse

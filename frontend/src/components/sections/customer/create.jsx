@@ -103,11 +103,52 @@ function AddressTable({addresses, setAddresses}){
     )
 }
 
-export function CreateWindow({isOpen, setOpen}){ 
-    const [price, setPrice] = useState();
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
+export function CreateWindow({isOpen, setOpen, onSubmit, editData = null}){ 
+    const [name, setName] = useState(editData?.name || '');
+    const [email, setEmail] = useState(editData?.email || '');
     const [addresses, setAddresses] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (editData) {
+            setName(editData.name || '');
+            setEmail(editData.email || '');
+            // Convert addresses from backend format to component format
+            if (editData.addresses && Array.isArray(editData.addresses)) {
+                const formattedAddresses = editData.addresses.map(addr => ({
+                    address: addr.delivery_address || addr.address || '',
+                    phone_num: addr.phone_num || addr.phone_number || ''
+                }));
+                setAddresses(formattedAddresses);
+            } else {
+                setAddresses([]);
+            }
+        } else {
+            setName('');
+            setEmail('');
+            setAddresses([]);
+        }
+    }, [editData, isOpen]);
+
+    const handleSubmit = async () => {
+        setLoading(true);
+        try {
+            // Convert addresses back to API format
+            const formattedAddresses = addresses.map(addr => ({
+                delivery_address: addr.address,
+                phone_num: addr.phone_num
+            }));
+            await onSubmit({
+                name: name,
+                email: email,
+                addresses: formattedAddresses
+            });
+        } catch (err) {
+            console.error("Error:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return(
         <div
@@ -119,13 +160,14 @@ export function CreateWindow({isOpen, setOpen}){
             `}
         >            
             <div onClick={(e) => e.stopPropagation()} className='flex flex-col bg-primary-light max-w-[500px] rounded-2xl p-5 shadow-md shadow-accent-dark border-primary-dark border-2'>
-                <p className="font-bold text-2md text-text">New Customer</p>
+                <p className="font-bold text-2md text-text">{editData ? 'Edit Customer' : 'New Customer'}</p>
                 <span className="ml-1">
                     <div className="w-full flex flex-row gap-3">
                         <div className="flex flex-col flex-nowrap gap-1">
                             <p className="font-semibold text-sm mt-2 text-text-light">Customer name</p>
                             <input 
                                 placeholder="Name"
+                                value={name}
                                 className='bg-secondary py-1 h-full w-full rounded-md text-text-dark px-2' 
                                 onInput={(e)=>(setName(e.target.value))}
                             />
@@ -135,6 +177,7 @@ export function CreateWindow({isOpen, setOpen}){
                             <input 
                                 placeholder="name@email.com"
                                 type="email"
+                                value={email}
                                 className='bg-secondary py-1 h-full w-full rounded-md text-text-dark px-2' 
                                 onInput={(e)=>(setEmail(e.target.value))}
                             />
@@ -143,13 +186,12 @@ export function CreateWindow({isOpen, setOpen}){
                     <AddressTable addresses={addresses} setAddresses={setAddresses}/>
                     <div className="flex flex-row flex-nowrap justify-between mt-3">
                         <Button onClick={()=>{setOpen(false)}} className='shadow-sm bg-accent-light border-primary-dark border text-text-dark hover:bg-accent-dark transition-color duration-200 ease-in-out'>Close</Button>
-                        <Button className='shadow-sm hover:bg-accent-dark transition-colors duration-200 ease-in-out'
-                            onClick={() => {
-                                // TODO 
-                                setOpen(false);
-                            }}
+                        <Button 
+                            className='shadow-sm hover:bg-accent-dark transition-colors duration-200 ease-in-out'
+                            disabled={loading}
+                            onClick={handleSubmit}
                         >
-                                Create
+                                {editData ? 'Update' : 'Create'}
                         </Button>
                     </div>   
                 </span>       

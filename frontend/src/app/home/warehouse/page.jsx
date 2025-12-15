@@ -38,20 +38,63 @@ export default function Warehouse(){
     const [create, setCreate] = useState(false);
     const router = useRouter();
     const [confirmation, setConfirmation] = useState(false);
+    const [selectedWarehouse, setSelectedWarehouse] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isEditing, setIsEditing] = useState(false);
 
-    useEffect(()=>{
-        async function getWarehouses(){
-            try {
-                const res = await api.get("/warehouses");
-                if (res.status >= 200 && res.status <= 300) {
-                    setWarehouses(res.data);
-                }
-            } catch (err) {
-                console.error(err);
+    const fetchWarehouses = async (query = '') => {
+        try {
+            const endpoint = query ? `/warehouse/search?name=${query}` : '/warehouse';
+            const res = await api.get(endpoint);
+            if (res.status >= 200 && res.status <= 300) {
+                setWarehouses(res.data || []);
             }
+        } catch (err) {
+            console.error("Failed to fetch warehouses:", err);
         }
-        getWarehouses();
-    },[]);
+    };
+
+    useEffect(() => {
+        fetchWarehouses();
+    }, []);
+
+    const handleSearch = (query) => {
+        setSearchQuery(query);
+        fetchWarehouses(query);
+    };
+
+    const handleCreate = async (formData) => {
+        try {
+            await api.post("/warehouse", formData);
+            await fetchWarehouses(searchQuery);
+            setCreate(false);
+        } catch (err) {
+            console.error("Failed to create warehouse:", err);
+        }
+    };
+
+    const handleEdit = async (formData) => {
+        try {
+            await api.put(`/warehouse/${selectedWarehouse.warehouse_id}`, formData);
+            await fetchWarehouses(searchQuery);
+            setCreate(false);
+            setIsEditing(false);
+            setSelectedWarehouse(null);
+        } catch (err) {
+            console.error("Failed to edit warehouse:", err);
+        }
+    };
+
+    const handleDelete = async () => {
+        try {
+            await api.delete(`/warehouse/${selectedWarehouse.warehouse_id}`);
+            await fetchWarehouses(searchQuery);
+            setConfirmation(false);
+            setSelectedWarehouse(null);
+        } catch (err) {
+            console.error("Failed to delete warehouse:", err);
+        }
+    };
 
     useEffect(() => {
         const keys = Object.keys(rowSelection);
@@ -81,16 +124,7 @@ export default function Warehouse(){
             header:'Address'
         },
         {
-            accessorKey:'stock',
-            header:'Stock level',
-            cell: ({row})=>(<span>1000</span>)
-        },
-        {
-            accessorKey:'total_sales',
-            header:'Total sales',
-            cell: ({row})=>(<span>Rp. 1,000</span>)
-        },{
-            accessorKey: 'action',
+            accessorKey: 'actions',
             header:'',
             cell: ({row})=>{                
                 return(
@@ -101,11 +135,18 @@ export default function Warehouse(){
                         </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-40" align="end">
-                            <DropdownMenuItem onClick={() => console.log("Edit")}>
-                            Edit
+                            <DropdownMenuItem onClick={() => {
+                                setSelectedWarehouse(row.original);
+                                setIsEditing(true);
+                                setCreate(true);
+                            }}>
+                                Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setConfirmation(true); }}>
-                            Delete
+                            <DropdownMenuItem onClick={() => {
+                                setSelectedWarehouse(row.original);
+                                setConfirmation(true);
+                            }}>
+                                Delete
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -115,27 +156,33 @@ export default function Warehouse(){
     ]
 
     const tableProps = {
-        data:warehouses,
+        data: warehouses,
         columns,
-        enableRowSelection: true,
+        enableRowSelection: false,
         idName: 'warehouse_id',
-        setRowSelection,
-        rowSelection
+        setRowSelection: undefined,
+        rowSelection: undefined
     }
     return (
         <>
-        {create && <CreateWindow setOpen={setCreate} isOpen={create}/>}
+        <CreateWindow 
+            setOpen={setCreate} 
+            isOpen={create}
+            onSubmit={isEditing ? handleEdit : handleCreate}
+            editData={isEditing ? selectedWarehouse : null}
+        />
         <Dialog open={confirmation} onOpenChange={setConfirmation} >
             <DialogContent className="[&~.fixed.inset-0]:bg-transparent">
                 <DialogHeader>
                 <DialogTitle className='text-text-dark'>Are you absolutely sure?</DialogTitle>
                 <DialogDescription>
                     This action cannot be undone. Are you sure you want to permanently
-                    delete this product from your warehouse?
+                    delete this warehouse from our servers?
                 </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
-                <Button type="submit">Confirm</Button>
+                <Button variant="outline" onClick={() => setConfirmation(false)}>Cancel</Button>
+                <Button onClick={handleDelete} className='bg-red-600 hover:bg-red-700'>Confirm Delete</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

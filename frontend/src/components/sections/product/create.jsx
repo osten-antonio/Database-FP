@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button"
 import { SearchableCBox } from "@/components/widget/SearchableCBox";
 import CurrencyInput from 'react-currency-input-field';
 import { Pencil } from "lucide-react";
+import api from "@/lib/axios";
+import { useData } from "@/app/context/DataContext";
 import {
   Dialog,
   DialogClose,
@@ -91,13 +93,30 @@ function CreateCategory({setCategories}) {
     const [cTColorDisabled, setCTColorDisabled] = useState(false);
     const [cColorDisabled, setCColorDisabled] = useState(false);
 
+    const handleCreateCategory = async () => {
+        try {
+            const res = await api.post("/category", {
+                name,
+                bg_color: categoryColor,
+                text_color: cTextColor
+            });
+            if (res.status >= 200 && res.status <= 300) {
+                setCategories(prev => [...prev, { category_id: Date.now(), name, bg_color: categoryColor, text_color: cTextColor }]);
+                setName('');
+                setCategoryColor('#FFFFFF');
+                setCTextColor('#000000');
+            }
+        } catch (err) {
+            console.error("Failed to create category:", err);
+        }
+    };
+
     return (
         <Dialog>
             <form>
                 <DialogTrigger asChild>
                     <Button variant="outline"
                         role="combobox"
-                        aria-expanded={open}
                         className="w-full mt-1 justify-center bg-primary text-text border-0 hover:bg-accent-dark transition-colors ease-in-out duration-300"
                     >Create new Category</Button>
                 </DialogTrigger>
@@ -201,8 +220,7 @@ function CreateCategory({setCategories}) {
                     <DialogClose asChild>
                     <Button variant="outline" >Cancel</Button>
                     </DialogClose>
-                    {/* TODO on create, call api, fetch back category update category*/}
-                    <Button type="submit" className='shadow-sm hover:bg-accent-dark transition-colors duration-200 ease-in-out'>Create</Button> 
+                    <Button type="submit" className='shadow-sm hover:bg-accent-dark transition-colors duration-200 ease-in-out' onClick={handleCreateCategory}>Create</Button> 
                 </DialogFooter>
                 </DialogContent>
             </form>
@@ -212,11 +230,53 @@ function CreateCategory({setCategories}) {
 
 
 
-export function CreateWindow({isOpen, setOpen}){ 
-    const [price, setPrice] = useState();
-    const [name, setName] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('');
-    const [categories, setCategories] = useState([]);
+export function CreateWindow({isOpen, setOpen, onSubmit, editData = null}){ 
+    const { categories, suppliers } = useData();
+    const [price, setPrice] = useState(editData?.price || '');
+    const [name, setName] = useState(editData?.name || '');
+    const [selectedCategory, setSelectedCategory] = useState(editData?.category_id || '');
+    const [selectedSupplier, setSelectedSupplier] = useState(editData?.supplier_name || '');
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (editData) {
+            setName(editData.name || '');
+            setPrice(editData.price || '');
+            setSelectedCategory(editData.category_id || '');
+            setSelectedSupplier(editData.supplier_name || '');
+        } else {
+            setName('');
+            setPrice('');
+            setSelectedCategory('');
+            setSelectedSupplier('');
+        }
+    }, [editData, isOpen]);
+
+    const categoryList = categories.map(cat => ({
+        value: cat.category_id || cat.id,
+        label: cat.name
+    }));
+
+    const supplierList = suppliers.map(sup => ({
+        value: sup.name,
+        label: sup.name
+    }));
+
+    const handleSubmit = async () => {
+        setLoading(true);
+        try {
+            await onSubmit({
+                product_name: name,
+                price: parseFloat(price) || 0,
+                category_id: selectedCategory || 0,
+                supplier_name: selectedSupplier
+            });
+        } catch (err) {
+            console.error("Failed to submit:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return(
         <div
@@ -228,13 +288,14 @@ export function CreateWindow({isOpen, setOpen}){
             `}
         >            
             <div onClick={(e) => e.stopPropagation()} className='flex flex-col bg-primary-light max-w-[500px] rounded-2xl p-5 shadow-md shadow-accent-dark border-primary-dark border-2'>
-                <p className="font-bold text-2md text-text">New Product</p>
+                <p className="font-bold text-2md text-text">{editData ? 'Edit Product' : 'New Product'}</p>
                 <span className="ml-1">
                     <div className="w-full flex flex-row gap-3">
                         <div className="flex flex-col flex-nowrap gap-1">
                             <p className="font-semibold text-sm mt-2 text-text-light">Product name</p>
                             <input 
                                 placeholder="Name"
+                                value={name}
                                 className='bg-secondary py-1 h-full w-full rounded-md text-text-dark px-2' 
                                 onInput={(e)=>(setName(e.target.value))}
                             />
@@ -258,21 +319,23 @@ export function CreateWindow({isOpen, setOpen}){
                     <div className="w-full flex flex-row gap-3">
                         <div className="flex flex-col flex-nowrap gap-1 w-full">
                             <p className="font-semibold text-sm mt-2 text-text-light">Category</p>
-                            <SearchableCBox name='category' list={categories} setSelected={setSelectedCategory}/>
+                            <SearchableCBox name='category' list={categoryList} setSelected={setSelectedCategory} value={selectedCategory}/>
                         </div>
                         <div className="flex flex-col flex-nowrap gap-1 h-full mt-auto w-full">
-                            <CreateCategory setCategories={setCategories}/>
+                            <CreateCategory setCategories={setSelectedCategory}/>
                         </div>
+                    </div>
+                    <div className="flex flex-col flex-nowrap gap-1">
+                        <p className="font-semibold text-sm mt-2 text-text-light">Supplier</p>
+                        <SearchableCBox name='supplier' list={supplierList} setSelected={setSelectedSupplier} value={selectedSupplier}/>
                     </div>
                     <div className="flex flex-row flex-nowrap justify-between mt-3">
                         <Button onClick={()=>{setOpen(false)}} className='shadow-sm bg-accent-light border-primary-dark border text-text-dark hover:bg-accent-dark transition-color duration-200 ease-in-out'>Close</Button>
-                        <Button className='shadow-sm hover:bg-accent-dark transition-colors duration-200 ease-in-out'
-                            onClick={() => {
-                                // TODO 
-                                setOpen(false);
-                            }}
+                        <Button className='shadow-sm hover:bg-accent-dark transition-colors duration-200 ease-in-out' 
+                            disabled={loading}
+                            onClick={handleSubmit}
                         >
-                                Create
+                                {editData ? 'Update' : 'Create'}
                         </Button>
                     </div>   
                 </span>       
@@ -280,4 +343,3 @@ export function CreateWindow({isOpen, setOpen}){
         </div>
     )
 }
-

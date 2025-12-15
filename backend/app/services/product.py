@@ -3,20 +3,23 @@ from ..db import connect
 def get_product():
     try:
         conn = connect()
-        cur = conn.cursor()
+        cur = conn.cursor(dictionary=True)
 
         query = """
-            SELECT p.product_id, p.product_name, p.price, c.name AS category_name, a.name AS supplier_name, a.email AS supplier_email
-            FROM product p
-            LEFT JOIN category c ON p.category_id = c.category_id
-            LEFT JOIN account a ON p.account_id = a.account_id
+            SELECT p.product_id as id, p.product_name as name, p.price, p.category_id, a.name AS supplier_name, 
+                   COALESCE(SUM(ol.order_price), 0) as total_sales
+            FROM Product p
+            LEFT JOIN Category c ON p.category_id = c.category_id
+            LEFT JOIN Account a ON p.account_id = a.account_id
+            LEFT JOIN OrderLine ol ON p.product_id = ol.product_id
+            GROUP BY p.product_id, p.product_name, p.price, p.category_id, a.name
         """
         
         cur.execute(query)
         rows = cur.fetchall()
         conn.close()
 
-        return {"status": "success", "data": rows}
+        return rows
 
     except Exception as e:
         return {"status": "error", "message": str(e)}
@@ -24,13 +27,15 @@ def get_product():
 def search_product(name='',supplier=''):
     try:
         conn = connect()
-        cur = conn.cursor()
+        cur = conn.cursor(dictionary=True)
 
         query = """
-            SELECT p.product_id, p.product_name, p.price, c.name AS category_name, a.name AS supplier_name, a.email AS supplier_email
-            FROM product p
-            LEFT JOIN category c ON p.category_id = c.category_id
-            LEFT JOIN account a ON p.account_id = a.account_id
+            SELECT p.product_id as id, p.product_name as name, p.price, p.category_id, a.name AS supplier_name, 
+                   COALESCE(SUM(ol.order_price), 0) as total_sales
+            FROM Product p
+            LEFT JOIN Category c ON p.category_id = c.category_id
+            LEFT JOIN Account a ON p.account_id = a.account_id
+            LEFT JOIN OrderLine ol ON p.product_id = ol.product_id
             WHERE 1 = 1
         """
         
@@ -44,11 +49,13 @@ def search_product(name='',supplier=''):
             query += " AND a.name LIKE %s"
             params.append(f"%{supplier}%")
 
+        query += " GROUP BY p.product_id, p.product_name, p.price, p.category_id, a.name"
+
         cur.execute(query, params)
         rows = cur.fetchall()
         conn.close()
 
-        return {"status": "success", "data": rows}
+        return rows
 
     except Exception as e:
         return {"status": "error", "message": str(e)}
@@ -59,7 +66,7 @@ def delete_product(id):
         conn = connect()
         cur = conn.cursor()
 
-        query = "DELETE FROM product WHERE product_id = %s"
+        query = "DELETE FROM Product WHERE product_id = %s"
 
         cur.execute(query, (id,))
         conn.commit()
@@ -77,7 +84,7 @@ def create_product(product_name,price=0,category_id=0,account_id=None):
         cur = conn.cursor()
 
         query = """
-            INSERT INTO product (product_name, price, category_id, account_id)
+            INSERT INTO Product (product_name, price, category_id, account_id)
             VALUES (%s, %s, %s, %s)
         """
         
@@ -98,7 +105,7 @@ def edit_product(id,product_name,price=0,category_id=0,account_id=None):
         cur = conn.cursor()
 
         query = """
-            UPDATE product
+            UPDATE Product
             SET product_name = %s, price = %s, category_id = %s, account_id = %s
             WHERE product_id = %s
         """
@@ -120,9 +127,9 @@ def filter_product(min_cost=0,max_cost=float('inf'),suppliers=[],category=[]):
 
         query = """
             SELECT p.product_id, p.product_name, p.price, c.name AS category_name, a.name AS supplier_name
-            FROM product p
-            LEFT JOIN category c ON p.category_id = c.category_id
-            LEFT JOIN account a ON p.account_id = a.account_id
+            FROM Product p
+            LEFT JOIN Category c ON p.category_id = c.category_id
+            LEFT JOIN Account a ON p.account_id = a.account_id
             WHERE p.price BETWEEN %s AND %s
         """
         

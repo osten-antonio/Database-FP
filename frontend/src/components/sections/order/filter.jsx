@@ -45,7 +45,7 @@ export function FilterWindow({isOpen, setOpen, filters = {}, setFilters}){
     useEffect(()=>{
         async function getWarehouses(){
             try {
-                const res = await api.get("/warehouses");
+                const res = await api.get("/warehouse");
                 if (res.status >= 200 && res.status <= 300) {
                     setAvailableWarehouses(res.data);
                 }
@@ -55,7 +55,7 @@ export function FilterWindow({isOpen, setOpen, filters = {}, setFilters}){
         }
         async function getSupplier(){
             try {
-                const res = await api.get("/suppliers");
+                const res = await api.get("/supplier");
                 if (res.status >= 200 && res.status <= 300) {
                     setAvailableSuppliers(res.data);
                 }
@@ -67,7 +67,7 @@ export function FilterWindow({isOpen, setOpen, filters = {}, setFilters}){
         getSupplier();
     },[])
 
-    const AddItem = ({availableItems, itemIDName, name})=>{
+    const AddItem = ({availableItems, itemIDName, name, onAdd})=>{
         const [selected,setSelected] = useState(undefined);
 
         const handleSelect = () => {
@@ -77,11 +77,7 @@ export function FilterWindow({isOpen, setOpen, filters = {}, setFilters}){
 
             if (!selectedItem) return;
 
-            setWarehouses((prev) => {
-                if (prev.find((i) => i[itemIDName] === selectedItem[itemIDName])) 
-                    return prev;
-                return [...prev, selectedItem];
-            });
+            onAdd(selectedItem);
         };
 
         return (
@@ -232,20 +228,26 @@ export function FilterWindow({isOpen, setOpen, filters = {}, setFilters}){
                             <label> In progress</label>
                         </span>
                     </form>
-                    <p className="font-semibold text-sm mt-2 text-text-light">Status</p>
+                    <p className="font-semibold text-sm mt-2 text-text-light">Warehouse</p>
                     <ListSelector 
-                        Dialog={()=>(<><AddItem availableItems={availableWarehouses} itemIDName='warehouse_id' name='warehouse'/></>)} 
-                        items={warehouses} setItems={setWarehouses} itemIDName='warehouse_id'
-                    />
-                    <p className="font-semibold text-sm mt-2 text-text-light">Category</p> 
-                    {/* TODO */}
-                    <ListSelector 
-                        Dialog={()=>(<><AddItem availableItems={availableWarehouses} itemIDName='warehouse_id' name='category'/></>)} 
+                        Dialog={()=>(<><AddItem availableItems={availableWarehouses} itemIDName='warehouse_id' name='warehouse' onAdd={(item) => {
+                            setWarehouses((prev) => {
+                                if (prev.find((i) => i.warehouse_id === item.warehouse_id)) 
+                                    return prev;
+                                return [...prev, item];
+                            });
+                        }}/></>)} 
                         items={warehouses} setItems={setWarehouses} itemIDName='warehouse_id'
                     />
                     <p className="font-semibold text-sm mt-2 text-text-light">Supplier</p>
                     <ListSelector 
-                        Dialog={()=>(<><AddItem availableItems={availableSuppliers} itemIDName='id' name='supplier'/></>)} 
+                        Dialog={()=>(<><AddItem availableItems={availableSuppliers} itemIDName='id' name='supplier' onAdd={(item) => {
+                            setSuppliers((prev) => {
+                                if (prev.find((i) => i.id === item.id)) 
+                                    return prev;
+                                return [...prev, item];
+                            });
+                        }}/></>)} 
                         items={suppliers} setItems={setSuppliers} itemIDName='id'
                     />      
                     <div className="flex flex-row flex-nowrap justify-between mt-3">

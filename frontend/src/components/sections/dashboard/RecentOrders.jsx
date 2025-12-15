@@ -17,7 +17,7 @@ export function RecentOrders(){
     useEffect(() => {
         async function fetchOrders() {
             try {
-                const res = await api.get("/orders");
+                const res = await api.get("/order");
                 if (res.status >= 200 && res.status <= 300) {
                     setOrders(res.data.slice(0,5));
                 }
