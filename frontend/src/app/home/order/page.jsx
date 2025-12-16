@@ -272,16 +272,14 @@ export default function Order() {
                 filters={filters}
                 setFilters={handleApplyFilters}
             />
-
-                <BasicLayout name='Orders' 
-                    tableProps={{...tableProps, data: orders, enableRowSelection: false}} 
-                    FilterWindow={() => null}
-                    CreateWindow={() => null}
-                    onSearch={handleSearch}
-                    onFilter={() => setFilterOpen(true)}
-                    onCreateClick={handleCreateClick}
-                />
-
+            <BasicLayout name='Orders' 
+                tableProps={{...tableProps, data: orders, enableRowSelection: false}} 
+                FilterWindow={() => null}
+                CreateWindow={() => null}
+                onSearch={handleSearch}
+                onFilter={() => setFilterOpen(true)}
+                onCreateClick={handleCreateClick}
+            />
         </>
     )
 }

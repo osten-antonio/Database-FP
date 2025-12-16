@@ -59,10 +59,23 @@ export default function Customers(){
 
     const fetchCustomers = async (query = '') => {
         try {
-            const endpoint = query ? `/customer/search?name=${query}` : '/customer';
+            let endpoint = '/customer';
+            let cleanedQuery = query.trim();
+            if (cleanedQuery.startsWith('?')) {
+                cleanedQuery = cleanedQuery.slice(1);
+            }
+            const match = cleanedQuery.match(/^(name|email|address|phone)\s*=\s*(.+)$/);
+
+            if (match) {
+                const [, key, value] = match;
+                endpoint = `/customer/search?${key}=${encodeURIComponent(value)}`;
+            } else {
+                // fallback
+                endpoint = `/customer/search?name=${encodeURIComponent(cleanedQuery)}`;
+            }
             const res = await api.get(endpoint);
             if (res.status >= 200 && res.status <= 300) {
-                setCustomers(res.data.data || res.data);
+                setCustomers(res.data || []);
             }
         } catch (err) {
             console.error("Failed to fetch customers:", err);

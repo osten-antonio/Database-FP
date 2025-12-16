@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends, Body
 from ..schemas import ErrorResponse
-from ..services.customer import get_customers, search_customers, add_customer, edit_customer
+from ..services import get_customers, search_customers, add_customer, edit_customer, delete_customer
 from .auth import verify_token
 from typing import List
 
@@ -11,6 +11,13 @@ async def get_all_customers(token: dict = Depends(verify_token)):
     """Get all customers"""
     result = get_customers()
     return result
+
+@router.delete("/{customer_id}", response_model=None, responses={401: {"model": ErrorResponse}})
+async def delete_customers(customer_id:int,token: dict = Depends(verify_token)):
+    """Delete customer"""
+    delete_customer(customer_id)
+    
+
 
 @router.get("/{customer_id}/address", response_model=List[dict], responses={401: {"model": ErrorResponse}})
 async def get_customer_addresses(customer_id: int, token: dict = Depends(verify_token)):
@@ -27,10 +34,10 @@ async def get_customer_addresses(customer_id: int, token: dict = Depends(verify_
 
 @router.get("/search", response_model=List[dict], responses={401: {"model": ErrorResponse}})
 async def search(
-    name: str = Body(...),
-    email: str = Body(...),
-    address: str = Body(...),
-    phone: str = Body(...),
+    name: str = "",
+    email: str = "",
+    address: str = "",
+    phone: str = "",
     token: dict = Depends(verify_token)
 ):
     """Search customers by name, email, address, or phone"""

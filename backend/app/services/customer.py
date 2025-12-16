@@ -148,6 +148,21 @@ def get_customer_addresses(customer_id):
     except Exception as e:
         raise e
 
+def delete_customer(customer_id):
+    try:
+        conn = connect()
+        cursor = conn.cursor(dictionary=True)
+        query = """
+            DELETE FROM Customer WHERE customer_id=%s
+        """
+        cursor.execute(query, (customer_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+    except Exception as e:
+        raise e
+
 if __name__ == '__main__':
     '''
     test here
