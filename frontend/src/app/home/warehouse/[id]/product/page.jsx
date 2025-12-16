@@ -1,11 +1,26 @@
-"use client"
-import { useState, useEffect } from 'react';
+'use client'
+import { useState, useEffect, useRef } from 'react';
+import { useParams } from 'next/navigation';
 import api from '@/lib/axios'
+import { BasicLayout, DataTable } from '@/components/layout/BasicLayout';
 import { FilterWindow } from '@/components/sections/product/filter';
-import { DataTable } from '@/components/layout/BasicLayout';
 import { Button } from '@/components/ui/button';
 import { EllipsisVertical } from 'lucide-react';
 import { ListFilter } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,76 +29,77 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { useParams } from "next/navigation";
-import { RestockOrderTable } from '@/components/sections/warehouse/RestockOrder';
+import { Input } from '@/components/ui/input';
 import { AddProduct } from '@/components/sections/warehouse/AddProduct';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+import { RestockOrderTable } from '@/components/sections/warehouse/RestockOrder'
 
-export default function Products(){
-    const [products,setProducts] = useState([]);
-    const [isFilter, setFilter] = useState(false);
+export default function WarehouseProducts(){
+    const [products, setProducts] = useState([]);
+    const [restockOpen, setRestockOpen] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
+        const [isFilter, setFilter] = useState(false);
     const [filters, setFilters] = useState(undefined);
     const [add, setAdd] = useState(false);
-    const [confirmation, setConfirmation] = useState(false);
     const id = useParams().id;
+    const restockTableRef = useRef(null);
 
-    useEffect(()=>{ // TODO
-        async function getProducts(){
-            try {
-                const res = await api.get("/product");
-                if (res.status >= 200 && res.status <= 300) {
-                    setProducts(res.data);
+    const fetchProducts = async (query = '') => {
+        try {
+            let endpoint = `/warehouse/${id}/products`;
+            
+            const res = await api.get(endpoint);
+            if (res.status >= 200 && res.status <= 300) {
+                let data = res.data || [];
+                
+                // Apply search filter client-side
+                if (query) {
+                    data = data.filter(p => 
+                        p.name.toLowerCase().includes(query.toLowerCase()) ||
+                        p.supplier.toLowerCase().includes(query.toLowerCase())
+                    );
                 }
-            } catch (err) {
-                console.error(err);
+                
+                setProducts(data);
             }
+        } catch (err) {
+            console.error("Failed to fetch products:", err);
         }
-        getProducts();
-    },[]);
+    };
 
+    useEffect(() => {
+        fetchProducts();
+    }, [id]);
+
+    const handleSearch = (query) => {
+        setSearchQuery(query);
+        fetchProducts(query);
+    };
 
     const columns = [
         {
-            accessorKey: "product_id",
+            accessorKey: "id",
             header: "ID",
-            cell: ({ row }) => <span>{row.getValue("product_id")}</span>,
+            cell: ({ row }) => <span>{row.getValue("id")}</span>,
         },
         {
-            accessorKey: "product_name",
+            accessorKey: "name",
             header: "Name",
         },
         {
-            accessorKey: "total_sales",
-            header: "Total sales",
-        },
-    {
-            accessorKey: 'stock',
-            header: 'Stock',
+            accessorKey: "ttl_sales",
+            header: "Total Sales",
+            cell: ({ row }) => <span>Rp. {row.getValue("ttl_sales")}</span>,
         },
         {
-            accessorKey: "supplier_name",
+            accessorKey: "supplier",
             header: "Supplier",
         },
         {
-            accessorKey: "price",
+            accessorKey: "cost",
             header: "Price",
             cell: ({ row }) => {
-                const price = Number(row.getValue("price"));
+                const price = Number(row.getValue("cost"));
                 const formatted = price % 1 === 0 ? price.toString() : price.toFixed(3);
                 return `Rp. ${formatted}`;
             }
@@ -91,7 +107,10 @@ export default function Products(){
         {
             accessorKey: "category_id",
             header: "Category",
-            // TODO cell:
+        },
+        {
+            accessorKey: "stock",
+            header: "Stock",
         },
         {
             accessorKey: "actions",
@@ -105,11 +124,11 @@ export default function Products(){
                         </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-40" align="end">
-                            <DropdownMenuItem onSelect={() => console.log("Edit")}>
-                            Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setConfirmation(true)}>
-                            Delete
+                            <DropdownMenuItem onClick={() => { 
+                                setSelectedProduct(row.original);
+                                setRestockOpen(true);
+                            }}>
+                                Restock
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -118,18 +137,19 @@ export default function Products(){
         }
     ];
 
-    const tableProps = {
-        data:products,
-        enableRowSelection: false,
-        idName: 'order_id',
-        columns,
-        setRowSelection:undefined,
-        rowSelection:undefined
-    }
     
+    const tableProps = {
+        data: products,
+        enableRowSelection: false,
+        idName: 'id',
+        columns,
+        setRowSelection: undefined,
+        rowSelection: undefined
+    }
+
     return (
         <>
-            <Dialog open={confirmation} onOpenChange={setConfirmation} >
+            <Dialog>
                 <DialogContent className="[&~.fixed.inset-0]:bg-transparent">
                     <DialogHeader>
                     <DialogTitle className='text-text-dark'>Are you absolutely sure?</DialogTitle>
@@ -143,7 +163,9 @@ export default function Products(){
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-            <AddProduct isOpen={add} setOpen={setAdd} restock={false} id={id} />
+            <AddProduct isOpen={add} setOpen={setAdd} restock={false} id={id} onOrderCreated={() => {
+                restockTableRef.current?.fetchRestockOrders?.();
+            }} />
             <div className="w-full">          
                 <FilterWindow isOpen={isFilter} setOpen={setFilter} filters={filters} setFilters={setFilters}/>
                 <h1 className='text-text-dark text-3xl font-bold mb-4'>
@@ -191,7 +213,7 @@ export default function Products(){
                 </div>
                 <DataTable {...tableProps}/>
             </div>
-            <RestockOrderTable id={id} />
+            <RestockOrderTable id={id} ref={restockTableRef} />
         </>
     )
 }

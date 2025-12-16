@@ -8,7 +8,7 @@ def add_stock(product_id,warehouse_id,amount,cost,date):
             INSERT INTO Restock(product_id,warehouse_id,amount,cost,order_date)
             VALUES (%s,%s,%s,%s,%s)        
         ''', (product_id,warehouse_id,amount,cost,date))
-        
+        conn.commit()
         cursor.close()
         conn.close()
     except Exception as e:
@@ -65,7 +65,7 @@ def get_restock_orders(warehouse_id):
         conn = connect()
         cursor=conn.cursor()
         cursor.execute('''
-            SELECT r.restock_id, p.product_name, a.name, r.amount, r.cost, r.order_date
+            SELECT r.restock_id, p.product_name, a.name, r.amount, r.cost, r.order_date, p.category_id
             FROM Restock r
             JOIN Product p ON r.product_id = p.product_id
             JOIN Account a ON p.account_id = a.account_id
@@ -82,7 +82,8 @@ def get_restock_orders(warehouse_id):
                 'supplier_name':row[2],
                 'amount':row[3],
                 'cost':row[4],
-                'order_date':row[5]
+                'order_date':row[5],
+                'category_id': row[6]
             })
         return res
     except Exception as e:

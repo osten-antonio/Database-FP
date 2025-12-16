@@ -1,6 +1,6 @@
-from fastapi import APIRouter, HTTPException, status, Depends, Body
+from fastapi import APIRouter, HTTPException, status, Depends
 from ..schemas import ErrorResponse
-from ..services.warehouse import get_warehouse, create_warehouse, edit_warehouse, get_warehouse_products, filter_warehouse_product, search_warehouse, delete_warehouse
+from ..services.warehouse import get_warehouse, create_warehouse, get_name, edit_warehouse, get_warehouse_products, filter_warehouse_product, search_warehouse, delete_warehouse, get_warehouse_specific, get_warehouse_customers, get_warehouse_stats, get_warehouse_order_stats
 from .auth import verify_token
 from typing import List
 router = APIRouter(prefix="/warehouse", tags=["warehouse"])
@@ -28,20 +28,33 @@ async def search(name: str = "", token: dict = Depends(verify_token)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)
         )
+    
+
+@router.get("/get_name/{id}", response_model=str, responses={401: {"model": ErrorResponse}})
+async def search(id: str, token: dict = Depends(verify_token)):
+    """Search warehouses by name"""
+    try:
+        res = get_name(id)
+        return res
+    except Exception as e:
+        print(e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
 
 @router.post("/", response_model=dict, responses={401: {"model": ErrorResponse}})
 async def create_new_warehouse(
-    name: str = Body(...),
-    address: str = Body(...),
-    id: int = Body(...),
+    name: str,
+    address: str,
+    manager_id: int,
     token: dict = Depends(verify_token)
 ):
     """Create a new warehouse"""
     try:
-        create_warehouse(name=name, address=address, manager_id=id)
+        create_warehouse(name=name, address=address, manager_id=manager_id)
         return {"status": "success"}
     except Exception as e:
-        print(e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)
@@ -50,14 +63,14 @@ async def create_new_warehouse(
 @router.put("/{warehouse_id}", response_model=dict, responses={401: {"model": ErrorResponse}})
 async def update_warehouse(
     warehouse_id: int,
-    name: str = Body(...),
-    address: str = Body(...),
-    id: int = Body(...),
+    name: str,
+    address: str,
+    manager_id: int,
     token: dict = Depends(verify_token)
 ):
     """Update a warehouse"""
     try:
-        edit_warehouse(id=warehouse_id, name=name, address=address)
+        edit_warehouse(id=warehouse_id, name=name, address=address, manager=manager_id)
         return {"status": "success"}
     except Exception as e:
         raise HTTPException(
@@ -94,14 +107,52 @@ async def get_products(warehouse_id: int, limit: int = None, token: dict = Depen
             detail=str(e)
         )
 
-# @router.get("/{warehouse_id}/customers", response_model=dict, responses={401: {"model": ErrorResponse}})
-# async def get_customers(warehouse_id: int, token: dict = Depends(verify_token)):
-#     """Get customers associated with a warehouse"""
-#     try:
-#         res = get_warehouse_customer(warehouse_id)
-#         return {"status": "success", "data": res}
-#     except Exception as e:
-#         raise HTTPException(
-#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             detail=str(e)
-#         )
+@router.get("/{warehouse_id}/customers", response_model=dict, responses={401: {"model": ErrorResponse}})
+async def get_warehouse_detail_customers(warehouse_id: int, token: dict = Depends(verify_token)):
+    """Get customers associated with a warehouse"""
+    try:
+        res = get_warehouse_customers(warehouse_id)
+        return {"status": "success", "data": res}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+@router.get("/{warehouse_id}", response_model=dict, responses={401: {"model": ErrorResponse}})
+async def get_warehouse_detail(warehouse_id: int, token: dict = Depends(verify_token)):
+    """Get warehouse details with manager info"""
+    try:
+        res = get_warehouse_specific(warehouse_id)
+        return {"status": "success", "data": res}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+@router.get("/{warehouse_id}/stats", response_model=dict, responses={401: {"model": ErrorResponse}})
+async def get_warehouse_detail_stats(warehouse_id: int, token: dict = Depends(verify_token)):
+    """Get warehouse statistics"""
+    try:
+        res = get_warehouse_stats(warehouse_id)
+        return {"status": "success", "data": res}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+@router.get("/{warehouse_id}/order-stats", response_model=dict, responses={401: {"model": ErrorResponse}})
+async def get_warehouse_order_detail_stats(warehouse_id: int, token: dict = Depends(verify_token)):
+    """Get warehouse order statistics"""
+    try:
+        res = get_warehouse_order_stats(warehouse_id)
+        return {"status": "success", "data": res}
+    except Exception as e:
+        print(e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+

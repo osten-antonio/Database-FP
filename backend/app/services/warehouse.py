@@ -1,8 +1,82 @@
 from ..db import connect
 
 def get_warehouse_specific(id):
-    # TODO, combine warehouse customers, products
-    pass
+    try:
+        conn = connect()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Get warehouse info with manager details
+        cursor.execute('''
+            SELECT w.warehouse_id, w.name, w.address, a.name as manager_name, a.email as manager_email
+            FROM Warehouse w
+            LEFT JOIN Account a ON w.account_id = a.account_id
+            WHERE w.warehouse_id = %s
+        ''', (id,))
+        
+        warehouse = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        
+        return warehouse if warehouse else {"error": "Warehouse not found"}
+    except Exception as e:
+        raise e
+
+def get_warehouse_stats(id):
+    try:
+        conn = connect()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Get warehouse stats
+        cursor.execute('''
+            SELECT 
+                COALESCE(SUM(ol.amount * ol.order_price), 0) as total_revenue,
+                COALESCE(COUNT(DISTINCT ol.order_id), 0) as total_sales,
+                COALESCE(COUNT(DISTINCT i.product_id), 0) as total_products,
+                COALESCE(SUM(i.stock), 0) as total_stock
+            FROM Inventory i
+            LEFT JOIN OrderLine ol ON i.product_id = ol.product_id
+            WHERE i.warehouse_id = %s
+        ''', (id,))
+        
+        stats = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        
+        return stats if stats else {
+            "total_revenue": 0,
+            "total_sales": 0,
+            "total_products": 0,
+            "total_stock": 0
+        }
+    except Exception as e:
+        raise e
+
+def get_warehouse_order_stats(id):
+    try:
+        conn = connect()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Get order stats for warehouse
+        cursor.execute('''
+            SELECT 
+                COALESCE(SUM(CASE WHEN o.expected_delivery_date < CURDATE() AND o.is_delivered = 0 THEN 1 ELSE 0 END), 0) as overdue,
+                COALESCE(SUM(CASE WHEN o.is_delivered = 0 AND o.expected_delivery_date >= CURDATE() THEN 1 ELSE 0 END), 0) as in_progress,
+                COALESCE(SUM(CASE WHEN o.is_delivered = 1 THEN 1 ELSE 0 END), 0) as completed
+            FROM `Order` o
+            WHERE o.warehouse_id = %s
+        ''', (id,))
+        
+        stats = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        
+        return stats if stats else {
+            "overdue": 0,
+            "in_progress": 0,
+            "completed": 0
+        }
+    except Exception as e:
+        raise e
 
 def get_warehouse():
     try:
@@ -52,6 +126,28 @@ def edit_warehouse(id, name,address):
         cursor.close()
 
         conn.close()
+    except Exception as e:
+        raise e
+
+def get_warehouse_customers(id):
+    try:
+        conn = connect()
+
+        cursor=conn.cursor(dictionary=True)
+        cursor.execute('''
+            SELECT c.customer_id, c.name, c.email,
+                   a.address_id, a.delivery_address, a.phone_num
+            FROM Customer c
+            LEFT JOIN Address a ON c.customer_id = a.customer_id
+            WHERE c.customer_id IN (
+                       SELECT a.customer_id FROM `Order` o JOIN Address a ON o.address_id = a.address_id 
+                       WHERE warehouse_id = %s
+                       )
+        ''',(id,))
+        rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return rows
     except Exception as e:
         raise e
     
@@ -183,6 +279,21 @@ def delete_warehouse(id):
                 'phone_num': row[5],
             })
         return result
+    except Exception as e:
+        raise e
+def get_name(id):
+    try:
+        conn = connect()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT name FROM Warehouse WHERE warehouse_id=%s
+        ''',(int(id),))
+
+        row = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        
+        return row[0]
     except Exception as e:
         raise e
 
