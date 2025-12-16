@@ -28,7 +28,7 @@ def create_warehouse(name,address,manager_id):
 
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO Warehouse (name, address, manager_id)
+            INSERT INTO Warehouse (name, address, account_id)
             VALUES (%s, %s, %s)
         ''', (name, address, manager_id))
         conn.commit()
@@ -38,16 +38,16 @@ def create_warehouse(name,address,manager_id):
     except Exception as e:
         raise e
 
-def edit_warehouse(id, name,address,manager):
+def edit_warehouse(id, name,address):
     try:
         conn = connect()
 
         cursor = conn.cursor()
         cursor.execute('''
             UPDATE Warehouse
-            SET name=%s, address=%s, manager_id=%s
+            SET name=%s, address=%s
             WHERE warehouse_id=%s
-        ''', (name, address, manager, id))
+        ''', (name, address, id))
         conn.commit()
         cursor.close()
 

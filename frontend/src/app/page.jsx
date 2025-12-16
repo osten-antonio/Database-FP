@@ -3,9 +3,11 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation'
 import { useToken } from './context/TokenContext';
 
+
 export default function Auth() {
   const router = useRouter();
   const token = useToken();
+
 
   useEffect(()=>{
     if(token){

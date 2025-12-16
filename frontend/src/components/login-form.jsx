@@ -19,12 +19,14 @@ import api from '@/lib/axios'
 import { useToken } from "@/app/context/TokenContext"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { useId } from '@/app/context/IdContext'
 
 export function LoginForm({
   className,
   ...props
 }) {
   const { setToken, token } = useToken()
+  const { setId, Id } = useId();
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -46,14 +48,16 @@ export function LoginForm({
       if(res.status >= 200 && res.status <= 300){
         const data = res.data
         const accessToken = data["access_token"]
-        
+        const id = data['id']
         // Save token to context and localStorage
+        setId(Number(id))
         setToken(accessToken)
         localStorage.setItem('access_token', accessToken)
         localStorage.setItem('token', accessToken)
         localStorage.setItem('user', JSON.stringify(data))
+        localStorage.setItem('id',Number(id))
         
-        router.push('/home/supplier');
+        router.push('/home/');
       }
     } catch(e){
       setError(e.response?.data?.detail || "Login failed. Please try again.")

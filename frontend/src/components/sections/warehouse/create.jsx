@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import AddressPicker from './AddressPicker';
+import { useId } from "@/app/context/IdContext";
 
 function AddressTable({addresses, setAddresses}){
     const handleRemove = (i) => {
@@ -103,6 +104,7 @@ export function CreateWindow({isOpen, setOpen, onSubmit, editData = null}){
     const [name, setName] = useState(editData?.name || '');
     const [address, setAddress] = useState(editData?.address || '');
     const [loading, setLoading] = useState(false);
+    const { id } = useId();
 
     useEffect(() => {
         if (editData) {
@@ -123,7 +125,8 @@ export function CreateWindow({isOpen, setOpen, onSubmit, editData = null}){
         try {
             await onSubmit({
                 name: name,
-                address: address
+                address: address,
+                id: id
             });
         } catch (err) {
             console.error("Failed to submit:", err);

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, Body
 from ..schemas import ErrorResponse
 from ..services.warehouse import get_warehouse, create_warehouse, edit_warehouse, get_warehouse_products, filter_warehouse_product, search_warehouse, delete_warehouse
 from .auth import verify_token
@@ -31,16 +31,17 @@ async def search(name: str = "", token: dict = Depends(verify_token)):
 
 @router.post("/", response_model=dict, responses={401: {"model": ErrorResponse}})
 async def create_new_warehouse(
-    name: str,
-    address: str,
-    manager_id: int,
+    name: str = Body(...),
+    address: str = Body(...),
+    id: int = Body(...),
     token: dict = Depends(verify_token)
 ):
     """Create a new warehouse"""
     try:
-        create_warehouse(name=name, address=address, manager_id=manager_id)
+        create_warehouse(name=name, address=address, manager_id=id)
         return {"status": "success"}
     except Exception as e:
+        print(e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)
@@ -49,14 +50,14 @@ async def create_new_warehouse(
 @router.put("/{warehouse_id}", response_model=dict, responses={401: {"model": ErrorResponse}})
 async def update_warehouse(
     warehouse_id: int,
-    name: str,
-    address: str,
-    manager_id: int,
+    name: str = Body(...),
+    address: str = Body(...),
+    id: int = Body(...),
     token: dict = Depends(verify_token)
 ):
     """Update a warehouse"""
     try:
-        edit_warehouse(id=warehouse_id, name=name, address=address, manager=manager_id)
+        edit_warehouse(id=warehouse_id, name=name, address=address)
         return {"status": "success"}
     except Exception as e:
         raise HTTPException(

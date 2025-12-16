@@ -21,6 +21,7 @@ import {
   ColorPickerOutput,
   ColorPickerSelection,
 } from '@/components/ui/shadcn-io/color-picker';
+import { useId } from "react";
 
 function ColorPickerForm({ disabled, textState, setTextState}){
     const handleColorChange = useCallback((color) => {
@@ -232,6 +233,7 @@ function CreateCategory({setCategories}) {
 
 export function CreateWindow({isOpen, setOpen, onSubmit, editData = null}){ 
     const { categories, suppliers } = useData();
+    
     const [price, setPrice] = useState(editData?.price || '');
     const [name, setName] = useState(editData?.name || '');
     const [selectedCategory, setSelectedCategory] = useState(editData?.category_id || '');
