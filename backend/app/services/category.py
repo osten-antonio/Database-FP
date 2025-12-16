@@ -26,11 +26,12 @@ def insert_categories(name,bg='#FFFFFF',text='#000000'):
     try:
         conn = connect()
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO categories (name, bg_color, text_color) VALUES (%s, %s, %s)", (name,bg,text))
+        cursor.execute("INSERT INTO Category (name, bg_color, text_color) VALUES (%s, %s, %s)", (name,bg,text))
+        category_id = cursor.lastrowid
         conn.commit()
         cursor.close()
         conn.close()
-        
+        return {'category_id':category_id}
     except Exception as e:
         raise e
     

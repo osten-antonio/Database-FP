@@ -42,7 +42,7 @@ export default function Products(){
     const [confirmation, setConfirmation] = useState(false);
     const id = useParams().id;
 
-    useEffect(()=>{
+    useEffect(()=>{ // TODO
         async function getProducts(){
             try {
                 const res = await api.get("/product");
@@ -59,12 +59,12 @@ export default function Products(){
 
     const columns = [
         {
-            accessorKey: "id",
+            accessorKey: "product_id",
             header: "ID",
-            cell: ({ row }) => <span>{row.getValue("id")}</span>,
+            cell: ({ row }) => <span>{row.getValue("product_id")}</span>,
         },
         {
-            accessorKey: "name",
+            accessorKey: "product_name",
             header: "Name",
         },
         {

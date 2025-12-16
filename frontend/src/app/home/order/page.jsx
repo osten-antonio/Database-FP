@@ -25,7 +25,6 @@ import {
 
 export default function Order() {
     const [orders, setOrders] = useState([]);
-    const [rowSelection, setRowSelection] = useState({});
     const [confirmation, setConfirmation] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
@@ -81,7 +80,19 @@ export default function Order() {
                     endpoint += '?' + params.toString();
                 }
             } else if (query) {
-                endpoint = `/order/search?customer_name=${query}`;
+                let cleanedQuery = query.trim();
+                if (cleanedQuery.startsWith('?')) {
+                    cleanedQuery = cleanedQuery.slice(1);
+                }
+                const match = cleanedQuery.match(/^(item|customer_name|address)\s*=\s*(.+)$/);
+
+                if (match) {
+                    const [, key, value] = match;
+                    endpoint = `/order/search?${key}=${encodeURIComponent(value)}`;
+                } else {
+                    // fallback
+                    endpoint = `/order/search?customer_name=${encodeURIComponent(cleanedQuery)}`;
+                }
             }
             
             const res = await api.get(endpoint);

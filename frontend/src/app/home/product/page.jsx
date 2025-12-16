@@ -28,14 +28,53 @@ export default function Products(){
     const [products, setProducts] = useState([]);
     const [confirmation, setConfirmation] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const [filterOpen, setFilterOpen] = useState(false);
     const [createOpen, setCreateOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [isEditing, setIsEditing] = useState(false);
+    const [filters, setFilters] = useState({});
 
-    const fetchProducts = async (query = '') => {
+    const fetchProducts = async (query = '', appliedFilters = {}) => {
         try {
-            const endpoint = query ? `/product/search?name=${query}` : '/product';
-            const res = await api.get(endpoint);
+            let endpoint = '/product';
+            let res;
+
+            // Build filter parameters if filters are applied
+            if (Object.keys(appliedFilters).length > 0) {
+                const params = new URLSearchParams();
+                
+                if (appliedFilters.minCost) params.append('min_cost', appliedFilters.minCost);
+                if (appliedFilters.maxCost) params.append('max_cost', appliedFilters.maxCost);
+                if (appliedFilters.suppliers && appliedFilters.suppliers.length > 0) {
+                    const supplierNames = appliedFilters.suppliers.map(s => s.name).join(',');
+                    params.append('suppliers', supplierNames);
+                }
+                
+                res = await api.get(`/product/filter?${params.toString()}`);
+                if (res.status >= 200 && res.status <= 300) {
+                    let data = res.data || [];
+                    
+                    
+                    setProducts(data);
+                }
+            } else if (query) {
+                let cleanedQuery = query.trim();
+                if (cleanedQuery.startsWith('?')) {
+                    cleanedQuery = cleanedQuery.slice(1);
+                }
+
+                const match = cleanedQuery.match(/^(name|supplier)\s*=\s*(.+)$/);
+
+                if (match) {
+                    const [, key, value] = match;
+                    endpoint = `/product/search?${key}=${encodeURIComponent(value)}`;
+                } else {
+                    endpoint = `/product/search?name=${encodeURIComponent(cleanedQuery)}`;
+                }
+
+
+            }
+            res = await api.get(endpoint);
             if (res.status >= 200 && res.status <= 300) {
                 setProducts(res.data || []);
             }
@@ -50,13 +89,25 @@ export default function Products(){
 
     const handleSearch = (query) => {
         setSearchQuery(query);
-        fetchProducts(query);
+        fetchProducts(query, filters);
+    };
+
+    const handleApplyFilters = (appliedFilters) => {
+        setFilters(appliedFilters);
+        fetchProducts(searchQuery, appliedFilters);
+    };
+
+    const handleCreateClick = () => {
+        setIsEditing(false);
+        setSelectedProduct(null);
+        setCreateOpen(true);
     };
 
     const handleCreate = async (formData) => {
         try {
             await api.post("/product", formData);
-            await fetchProducts(searchQuery);
+            await fetchProducts(searchQuery, filters);
+            setCreateOpen(false);
         } catch (err) {
             console.error("Failed to create product:", err);
         }
@@ -64,10 +115,11 @@ export default function Products(){
 
     const handleEdit = async (formData) => {
         try {
-            await api.put(`/product/${selectedProduct.id}`, formData);
-            await fetchProducts(searchQuery);
+            await api.put(`/product/${selectedProduct.product_id}`, formData);
+            await fetchProducts(searchQuery, filters);
             setIsEditing(false);
             setSelectedProduct(null);
+            setCreateOpen(false);
         } catch (err) {
             console.error("Failed to edit product:", err);
         }
@@ -75,8 +127,8 @@ export default function Products(){
 
     const handleDelete = async () => {
         try {
-            await api.delete(`/product/${selectedProduct.id}`);
-            await fetchProducts(searchQuery);
+            await api.delete(`/product/${selectedProduct.product_id}`);
+            await fetchProducts(searchQuery, filters);
             setConfirmation(false);
             setSelectedProduct(null);
         } catch (err) {
@@ -86,17 +138,18 @@ export default function Products(){
 
     const columns = [
         {
-            accessorKey: "id",
+            accessorKey: "product_id",
             header: "ID",
-            cell: ({ row }) => <span>{row.getValue("id")}</span>,
+            cell: ({ row }) => <span>{row.getValue("product_id")}</span>,
         },
         {
-            accessorKey: "name",
+            accessorKey: "product_name",
             header: "Name",
         },
         {
             accessorKey: "total_sales",
             header: "Total sales",
+            cell: ({ row }) => <span>Rp. {row.getValue("total_sales")}</span>,
         },
         {
             accessorKey: "supplier_name",
@@ -130,7 +183,7 @@ export default function Products(){
                         <DropdownMenuItem onClick={() => { 
                             setSelectedProduct({
                                 ...row.original,
-                                id: row.getValue("id"), 
+                                id: row.getValue("product_id"), 
                             }); 
                             setIsEditing(true); 
                         }}>
@@ -138,7 +191,10 @@ export default function Products(){
                                 Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => {
-                                setSelectedProduct(row.original);
+                                setSelectedProduct({
+                                ...row.original,
+                                id: row.getValue("product_id"), 
+                            });
                                 setConfirmation(true);
                             }}>
                                 Delete
@@ -186,12 +242,28 @@ export default function Products(){
                 </DialogContent>
             </Dialog>
 
+
+            <CreateWindow 
+                isOpen={createOpen}
+                setOpen={setCreateOpen}
+                onSubmit={isEditing ? handleEdit : handleCreate}
+                editData={isEditing ? selectedProduct : null}
+            />
+
+            <FilterWindow 
+                isOpen={filterOpen} 
+                setOpen={setFilterOpen} 
+                filters={filters}
+                setFilters={handleApplyFilters}
+            />
                 <BasicLayout 
                     name='Products' 
                     tableProps={tableProps} 
-                    FilterWindow={FilterWindow} 
-                    CreateWindow={CustomCreateWindow}
+                    FilterWindow={() => null}
+                    CreateWindow={() => null}
                     onSearch={handleSearch}
+                    onFilter={() => setFilterOpen(true)}
+                    onCreateClick={handleCreateClick}
                 />
         </>
     )

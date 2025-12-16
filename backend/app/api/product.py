@@ -1,6 +1,6 @@
-from fastapi import APIRouter, HTTPException, status, Depends, Query
+from fastapi import APIRouter, HTTPException, status, Depends, Body, Query
 from ..schemas import ErrorResponse
-from ..services.product import get_product, search_product, delete_product, create_product, edit_product
+from ..services.product import get_product, search_product, delete_product, create_product, edit_product, filter_product
 from .auth import verify_token
 from typing import List
 
@@ -18,30 +18,51 @@ async def search(name: str = "", supplier: str = "", token: dict = Depends(verif
     result = search_product(name=name, supplier=supplier)
     return result
 
-@router.post("/", response_model=dict, responses={401: {"model": ErrorResponse}})
-async def create_new_product(
-    product_name: str,
-    price: float = 0,
-    category_id: int = 0,
-    account_id: int = None,
+@router.get("/filter", response_model=List[dict], responses={401: {"model": ErrorResponse}})
+async def filter_products(
+    min_cost: float = Query(0),
+    max_cost: float = Query(1e10),
+    suppliers: str = Query(""),
+    category_id: str = Query(""),
     token: dict = Depends(verify_token)
 ):
+    """Filter products by price range, suppliers, and categories"""
+    supplier_list = [s.strip() for s in suppliers.split(",") if s.strip()] if suppliers else []
+    category_list = [int(c.strip()) for c in category_id.split(",") if c.strip()] if category_id else []
+    
+    result = filter_product(
+        min_cost=min_cost,
+        max_cost=max_cost,
+        suppliers=supplier_list,
+        category_id=category_list
+    )
+    return result
+
+@router.post("/", response_model=dict, responses={401: {"model": ErrorResponse}})
+async def create_new_product(
+    product_name: str = Body(...),
+    price: float = Body(...),
+    category_id: int = Body(...),
+    supplier_name: str = Body(...),
+    token: dict = Depends(verify_token)
+):
+    print(price)
     """Create a new product"""
     result = create_product(
         product_name=product_name,
         price=price,
         category_id=category_id,
-        account_id=account_id
+        supplier_name=supplier_name
     )
     return result
 
 @router.put("/{product_id}", response_model=dict, responses={401: {"model": ErrorResponse}})
 async def update_product(
     product_id: int,
-    product_name: str,
-    price: float = 0,
-    category_id: int = 0,
-    account_id: int = None,
+    product_name: str = Body(...),
+    price: float = Body(...),
+    category_id: int = Body(...),
+    supplier_name: str = Body(...),
     token: dict = Depends(verify_token)
 ):
     """Update an existing product"""
@@ -50,7 +71,7 @@ async def update_product(
         product_name=product_name,
         price=price,
         category_id=category_id,
-        account_id=account_id
+        supplier_name = supplier_name
     )
     return result
 

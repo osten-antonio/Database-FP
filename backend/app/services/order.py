@@ -296,7 +296,6 @@ def edit_order(
         ).date()
         conn = connect()
         cursor = conn.cursor()
-        print(customer_id, " ".join(delivery_address.split()[:-1]))
         # get address_id
         cursor.execute("""
             SELECT address_id
@@ -307,7 +306,6 @@ def edit_order(
         row = cursor.fetchone()
         
         address_id = row[0]
-        print(address_id)
         cursor.execute("START TRANSACTION;")
 
         # update order
@@ -339,9 +337,9 @@ def edit_order(
                 VALUES (%s, %s, %s, %s);
             """, (
                 order_id,
-                item["id"],
+                item["product_id"],
                 item["amount"],
-                float(item["price"])
+                float(item["order_price"])
             ))
 
         conn.commit()
@@ -351,7 +349,6 @@ def edit_order(
     except Exception as e:
         if conn:
             conn.rollback()
-        print(e)
         raise e
 
 

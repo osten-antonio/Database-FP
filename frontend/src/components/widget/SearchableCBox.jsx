@@ -63,7 +63,7 @@ export function SearchableCBox({name, list, setSelected, value: externalValue}) 
                     <CommandItem
                     key={i.value}
                     value={i.value}
-                    onSelect={handleSelect}
+                    onSelect={() => handleSelect(i.value)}
                     >
                     {i.label}
                     <Check

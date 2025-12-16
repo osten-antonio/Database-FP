@@ -41,7 +41,7 @@ export function DataProvider({ children }) {
   };
 
   return (
-    <DataContext.Provider value={{ customers, categories, suppliers, loading, refetch: fetchAllData }}>
+    <DataContext.Provider value={{ customers, setCustomers, categories, setCategories, suppliers, setSuppliers, loading, refetch: fetchAllData }}>
       {children}
     </DataContext.Provider>
   );

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, Body
 from ..schemas import ErrorResponse
 from ..services.category import get_categories, insert_categories
 from .auth import verify_token
@@ -19,16 +19,17 @@ async def get_all_categories(token: dict = Depends(verify_token)):
 
 @router.post("/", response_model=dict, responses={401: {"model": ErrorResponse}})
 async def create_category(
-    name: str,
-    bg_color: str = "#FFFFFF",
-    text_color: str = "#000000",
+    name: str = Body(...),
+    bg_color: str = Body(...),
+    text_color: str = Body(...),
     token: dict = Depends(verify_token)
 ):
     """Create a new category"""
     try:
-        insert_categories(name=name, bg=bg_color, text=text_color)
-        return {"status": "success"}
+        return insert_categories(name=name, bg=bg_color, text=text_color)
+        
     except Exception as e:
+        print(e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)

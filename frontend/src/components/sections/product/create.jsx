@@ -87,14 +87,16 @@ function ColorPickerForm({ disabled, textState, setTextState}){
     )
 }
 
-function CreateCategory({setCategories}) {
+function CreateCategory({setSelectedCategory}) {
     const [name, setName] = useState('');
+    const { categories, setCategories } = useData();
     const [cTextColor, setCTextColor] = useState('#000000');
     const [categoryColor, setCategoryColor] = useState('#FFFFFF');
     const [cTColorDisabled, setCTColorDisabled] = useState(false);
     const [cColorDisabled, setCColorDisabled] = useState(false);
-
-    const handleCreateCategory = async () => {
+    const [open, setOpen] = useState(false);
+    const handleCreateCategory = async (e) => {
+        e.preventDefault(); 
         try {
             const res = await api.post("/category", {
                 name,
@@ -102,10 +104,12 @@ function CreateCategory({setCategories}) {
                 text_color: cTextColor
             });
             if (res.status >= 200 && res.status <= 300) {
-                setCategories(prev => [...prev, { category_id: Date.now(), name, bg_color: categoryColor, text_color: cTextColor }]);
+                setCategories(prev => [...prev, { category_id: res.data.category_id, name, bg_color: categoryColor, text_color: cTextColor }]);
+                setSelectedCategory({ category_id: res.data.category_id, name, bg_color: categoryColor, text_color: cTextColor })
                 setName('');
                 setCategoryColor('#FFFFFF');
                 setCTextColor('#000000');
+                setOpen(false)
             }
         } catch (err) {
             console.error("Failed to create category:", err);
@@ -113,7 +117,7 @@ function CreateCategory({setCategories}) {
     };
 
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}  >
             <form>
                 <DialogTrigger asChild>
                     <Button variant="outline"
@@ -235,14 +239,15 @@ export function CreateWindow({isOpen, setOpen, onSubmit, editData = null}){
     const { categories, suppliers } = useData();
     
     const [price, setPrice] = useState(editData?.price || '');
-    const [name, setName] = useState(editData?.name || '');
+    const [name, setName] = useState(editData?.product_name || '');
     const [selectedCategory, setSelectedCategory] = useState(editData?.category_id || '');
     const [selectedSupplier, setSelectedSupplier] = useState(editData?.supplier_name || '');
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        console.log(editData)
         if (editData) {
-            setName(editData.name || '');
+            setName(editData.product_name || '');
             setPrice(editData.price || '');
             setSelectedCategory(editData.category_id || '');
             setSelectedSupplier(editData.supplier_name || '');
@@ -324,7 +329,7 @@ export function CreateWindow({isOpen, setOpen, onSubmit, editData = null}){
                             <SearchableCBox name='category' list={categoryList} setSelected={setSelectedCategory} value={selectedCategory}/>
                         </div>
                         <div className="flex flex-col flex-nowrap gap-1 h-full mt-auto w-full">
-                            <CreateCategory setCategories={setSelectedCategory}/>
+                            <CreateCategory setSelectedCategory={setSelectedCategory}/>
                         </div>
                     </div>
                     <div className="flex flex-col flex-nowrap gap-1">

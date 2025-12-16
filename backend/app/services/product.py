@@ -6,10 +6,10 @@ def get_product():
         cur = conn.cursor(dictionary=True)
 
         query = """
-            SELECT p.product_id, p.product_name, p.price, p.category_id, a.name AS supplier_name, a.email AS supplier_email, COALESCE(SUM(ol.amount * ol.order_price), 0) AS total_sales
-            FROM product p
-            LEFT JOIN account a ON p.account_id = a.account_id
-            LEFT JOIN orderline ol ON p.product_id = ol.product_id
+            SELECT p.product_id, p.product_name, p.price, p.category_id, a.name AS supplier_name, a.email AS supplier_email, COALESCE(SUM(ol.amount * ol.order_price), 0) AS total_sales, a.account_id as account_id 
+            FROM Product p
+            LEFT JOIN Account a ON p.account_id = a.account_id
+            LEFT JOIN OrderLine ol ON p.product_id = ol.product_id
             GROUP BY p.product_id, p.product_name, p.price, p.category_id, a.name, a.email
         """
         
@@ -28,10 +28,10 @@ def search_product(name='', supplier=''):
         cur = conn.cursor(dictionary=True)
 
         query = """
-            SELECT p.product_id, p.product_name, p.price, p.category_id, a.name AS supplier_name, COALESCE(SUM(ol.amount * ol.order_price), 0) AS total_sales
-            FROM product p
-            LEFT JOIN account a ON p.account_id = a.account_id
-            LEFT JOIN orderline ol ON p.product_id = ol.product_id
+            SELECT p.product_id, p.product_name, p.price, p.category_id, a.name AS supplier_name, COALESCE(SUM(ol.amount * ol.order_price), 0) AS total_sales, a.account_id as account_id 
+            FROM Product p
+            LEFT JOIN Account a ON p.account_id = a.account_id
+            LEFT JOIN OrderLine ol ON p.product_id = ol.product_id
             WHERE 1 = 1
         """
         
@@ -45,7 +45,7 @@ def search_product(name='', supplier=''):
             query += " AND a.name LIKE %s"
             params.append(f"%{supplier}%")
 
-        query += """"
+        query += """
             GROUP BY p.product_id, p.product_name, p.price, p.category_id, a.name
         """
 
@@ -76,10 +76,14 @@ def delete_product(id):
         return {"status": "error", "message": str(e)}
 
 
-def create_product(product_name,price=0,category_id=0,account_id=None):
+def create_product(product_name,price=0,category_id=0,supplier_name=''):
     try:
         conn = connect()
         cur = conn.cursor()
+
+        cur.execute('SELECT account_id FROM Account WHERE LOWER(name)=%s',(supplier_name.lower(),))
+        account_id = cur.fetchone()[0]
+
 
         query = """
             INSERT INTO Product (product_name, price, category_id, account_id)
@@ -92,15 +96,18 @@ def create_product(product_name,price=0,category_id=0,account_id=None):
 
         return {"status": "success", "message": "product created"}
         
-        conn.close()
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
 
-def edit_product(id, product_name, price=0, category_id=0, account_id=None):
+def edit_product(id, product_name, price=0, category_id=0, supplier_name=''):
     try:
         conn = connect()
         cur = conn.cursor()
+
+        cur.execute('SELECT account_id FROM Account WHERE LOWER(name)=%s',(supplier_name.lower(),))
+        account_id = cur.fetchone()[0]
+
 
         query = """
             UPDATE Product
@@ -121,13 +128,14 @@ def edit_product(id, product_name, price=0, category_id=0, account_id=None):
 def filter_product(min_cost=0,max_cost=float('inf'),suppliers=[],category_id=[]):
     try:
         conn = connect()
-        cur = conn.cursor()
+        cur = conn.cursor(dictionary=True)
 
         query = """
-            SELECT p.product_id, p.product_name, p.price, p.category_id, a.name AS supplier_name, COALESCE(SUM(ol.amount * ol.order_price), 0) AS total_sales
-            FROM product p
-            LEFT JOIN account a ON p.account_id = a.account_id
-            LEFT JOIN orderline ol ON p.product_id = ol.product_id
+        
+            SELECT p.product_id, p.product_name, p.price, p.category_id, a.name AS supplier_name, a.email AS supplier_email, COALESCE(SUM(ol.amount * ol.order_price), 0) AS total_sales, a.account_id as account_id 
+            FROM Product p
+            LEFT JOIN Account a ON p.account_id = a.account_id
+            LEFT JOIN OrderLine ol ON p.product_id = ol.product_id
             WHERE p.price BETWEEN %s AND %s
         """
         
@@ -144,12 +152,12 @@ def filter_product(min_cost=0,max_cost=float('inf'),suppliers=[],category_id=[])
         query += """
             GROUP BY p.product_id, p.product_name, p.price, p.category_id, a.name
         """
-        
+        print(query,params)
         cur.execute(query, params)
         rows = cur.fetchall()
         conn.close()
 
-        return {"status": "success", "data": rows}
+        return rows
 
     except Exception as e:
         return {"status": "error", "message": str(e)}

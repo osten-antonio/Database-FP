@@ -265,19 +265,26 @@ export function CreateWindow({isOpen, setOpen, onSubmit, editData = null}){
 
     useEffect(() => {
         if (editData) {
-            setSelectedCustomer(editData.customer_id);
-            setSelectedWarehouse(editData.warehouse_id);
+            setSelectedCustomer(editData.customer_id.toString());
+            setSelectedWarehouse(editData.warehouse_id.toString());
             setSelectedAddress(editData.delivery_address);
+
             setOrderDate(editData.order_date ? new Date(editData.order_date) : undefined);
-            setExpectedDate(editData.expected_delivery_date ? new Date(editData.expected_delivery_date) : undefined);
-            setSelectedItems([editData]);
+            setExpectedDate(
+                editData.expected_delivery_date
+                    ? new Date(editData.expected_delivery_date)
+                    : undefined
+            );
+
+            setSelectedItems([{
+                product_id: editData.product_id,
+                name: editData.item,
+                amount: editData.amount,
+                price: Number(editData.cost),
+                total: Number(editData.cost) * editData.amount,
+            }]);
         } else {
             setSelectedItems([]);
-            setSelectedCustomer(undefined);
-            setSelectedWarehouse(undefined);
-            setSelectedAddress(undefined);
-            setOrderDate(undefined);
-            setExpectedDate(undefined);
         }
     }, [editData, isOpen]);
 

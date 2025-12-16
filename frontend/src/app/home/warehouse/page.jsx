@@ -98,6 +98,7 @@ export default function Warehouse(){
 
     useEffect(() => {
         const keys = Object.keys(rowSelection);
+        console.log(rowSelection);
         if (keys.length === 0) return;
 
         const rawId = keys[0];
@@ -158,10 +159,10 @@ export default function Warehouse(){
     const tableProps = {
         data: warehouses,
         columns,
-        enableRowSelection: false,
+        enableRowSelection: true,
         idName: 'warehouse_id',
-        setRowSelection: undefined,
-        rowSelection: undefined
+        setRowSelection: setRowSelection,
+        rowSelection: rowSelection
     }
     return (
         <>
