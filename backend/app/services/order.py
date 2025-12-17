@@ -72,7 +72,8 @@ def search_order(item='',customer_name='', address=''):
                 'customer_id': row['customer_id'],
                 'warehouse_id': row['warehouse_id'],
                 'address_id': row['address_id'],  
-                'product_id': row['product_id']
+                'product_id': row['product_id'],
+                'delivery_address': row['delivery_address']
             })
         return results
 
@@ -152,7 +153,7 @@ def filter_order(
         if supplier:
             sql += """
                 AND p.account_id IN (
-                    SELECT id FROM Account 
+                    SELECT account_id FROM Account 
                     WHERE account_type = 'supplier' 
                     AND LOWER(name) LIKE LOWER(%s)
                 )
@@ -200,7 +201,8 @@ def filter_order(
                 'customer_id': row[10],
                 'warehouse_id': row[11],
                 'address_id': row[12],  
-                'product_id': row[13]
+                'product_id': row[13],
+                'delivery_address': row[5]
             })
 
         return results
@@ -228,55 +230,92 @@ def delete_order(order_id,product_id):
         raise e
     
 def create_order(
-        customer_id,delivery_address,warehouse_id,order_date,delivery_date,items=[]
-        ):
-    '''
-    Docstring for create_order
-    Args:
-        customer_id (int): ID of the customer placing the order
-        warehouse_id (int): ID of the warehouse fulfilling the order
-        address_id (int): ID of the delivery address
-        order_date (string): Date when the order was placed (format: 'YYYY-MM-DD')
-        delivery_date (string): Expected delivery date (format: 'YYYY-MM-DD')
-        items (list[dict]): each dict contains 'product_id', 'amount', 'order_price'
-    '''
-    # TODO update inventory accordingly using warehouse_id, and items
+    customer_id,
+    delivery_address,
+    warehouse_id,
+    order_date,
+    delivery_date,
+    items=[]
+):
     try:
         order_date = datetime.fromisoformat(order_date.replace("Z", "")).date()
-        delivery_date = datetime.fromisoformat(
-            delivery_date.replace("Z", "")
-        ).date()
+        delivery_date = datetime.fromisoformat(delivery_date.replace("Z", "")).date()
+
         conn = connect()
         cursor = conn.cursor()
-        print(customer_id, " ".join(delivery_address.split()[:-1]))
-        # get address_id
+
         cursor.execute("""
             SELECT address_id
             FROM Address
-            WHERE customer_id = %s AND LOWER(delivery_address) = LOWER(%s)
+            WHERE customer_id = %s
+              AND LOWER(delivery_address) = LOWER(%s)
         """, (customer_id, " ".join(delivery_address.split()[:-1])))
-        
-        row = cursor.fetchone()
-        
-        address_id = row[0]        
-        cursor.execute(""" START TRANSACTION; """)
-        cursor.execute("""
-            INSERT INTO `Order` (address_id, warehouse_id, order_date, expected_delivery_date, is_delivered)
-            VALUES (%s, %s, %s, %s, FALSE);
-        """, (address_id, warehouse_id, order_date, delivery_date))
-        order_id = cursor.lastrowid
-        for item in items:
-            cursor.execute("""
-                INSERT INTO OrderLine (order_id, product_id, amount, order_price)
-                VALUES (%s, %s, %s, %s);
-            """, (order_id, item['product_id'], item['amount'], item['order_price']))
-        cursor.execute(""" COMMIT; """)
-        cursor.close()
-        
-        conn.close()
-    except Exception as e:
-        raise e
 
+        row = cursor.fetchone()
+        if not row:
+            raise ValueError("Delivery address not found")
+
+        address_id = row[0]
+
+        cursor.execute("START TRANSACTION")
+
+        cursor.execute("""
+            INSERT INTO `Order`
+                (address_id, warehouse_id, order_date, expected_delivery_date, is_delivered)
+            VALUES (%s, %s, %s, %s, FALSE)
+        """, (address_id, warehouse_id, order_date, delivery_date))
+
+        order_id = cursor.lastrowid
+
+        for item in items:
+            product_id = item["product_id"]
+            amount = item["amount"]
+            price = item["order_price"]
+
+            cursor.execute("""
+                SELECT stock
+                FROM Inventory
+                WHERE product_id = %s AND warehouse_id = %s
+                FOR UPDATE
+            """, (product_id, warehouse_id))
+
+            row = cursor.fetchone()
+            if not row:
+                raise ValueError(f"Product {product_id} not found in warehouse")
+
+            stock = row[0]
+            if stock < amount:
+                raise ValueError(
+                    f"Insufficient stock for product {product_id}. "
+                    f"Available: {stock}, requested: {amount}"
+                )
+
+            cursor.execute("""
+                UPDATE Inventory
+                SET stock = stock - %s
+                WHERE product_id = %s AND warehouse_id = %s
+            """, (amount, product_id, warehouse_id))
+
+
+            cursor.execute("""
+                INSERT INTO OrderLine
+                    (order_id, product_id, amount, order_price)
+                VALUES (%s, %s, %s, %s)
+            """, (order_id, product_id, amount, price))
+
+        cursor.execute("COMMIT")
+        cursor.close()
+        conn.close()
+
+        return order_id
+
+    except Exception as e:
+        try:
+            cursor.execute("ROLLBACK")
+        except:
+            pass
+        raise e
+    
 def edit_order(
     customer_id,
     delivery_address,
@@ -413,7 +452,8 @@ def get_order(limit=None):
                 'customer_id': row[10],
                 'warehouse_id': row[11],
                 'address_id': row[12],    
-                'product_id': row[13]            
+                'product_id': row[13],
+                'delivery_address': row[5]    
             })
         
 

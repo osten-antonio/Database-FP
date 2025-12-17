@@ -378,22 +378,31 @@ export function CreateWindow({isOpen, setOpen, onSubmit, editData = null}){
     },[warehouses]);
 
     const handleSubmit = async () => {
-        if (onSubmit) {
-            // Format items for backend
+        try {
+            if (!onSubmit) return;
+
             const formattedItems = selectedItems.map(item => ({
                 product_id: item.product_id || item.id,
                 amount: item.amount,
                 order_price: Number(item.price)
             }));
-            
+
             await onSubmit({
-                customer_id: parseInt(selectedCustomer),
-                warehouse_id: parseInt(selectedWarehouse),
+                customer_id: Number(selectedCustomer),
+                warehouse_id: Number(selectedWarehouse),
                 delivery_address: selectedAddress,
                 order_date: orderDate?.toISOString().split('T')[0],
                 expected_delivery_date: expectedDate?.toISOString().split('T')[0],
                 items: formattedItems
             });
+
+        } catch (err) {
+            const message =
+                err?.response?.data?.error ||
+                err?.response?.data?.message ||
+                "Failed to create order";
+
+            alert(message);
         }
     };
 

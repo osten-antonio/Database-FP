@@ -48,6 +48,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { RestockOrderTable } from '@/components/sections/warehouse/RestockOrder'
+import { Category } from '@/components/widget/Category';
+import { useData } from '@/app/context/DataContext';
 
 export default function InnerWarehouse(){
     const [customers, setCustomers] = useState([]);
@@ -77,7 +79,14 @@ export default function InnerWarehouse(){
     const [completedOrder, setCompletedOrder] = useState(false);
     const id = useParams().id;
     const router = useRouter();
+    const { categories } = useData();
+    const [categoryMap, setCategoryMap] = useState({}); 
 
+    useEffect(()=>{
+        setCategoryMap(Object.fromEntries(
+            categories.map(c => [c.category_id, c])
+            ))
+    },[categories])
     useEffect(()=>{
         async function getWarehouseProducts(){
             try {
@@ -472,7 +481,19 @@ export default function InnerWarehouse(){
                                                             {product.supplier}
                                                         </TableCell>
                                                         <TableCell className="text-text-dark text-[0.7rem] relative font-semibold after:content-[''] after:absolute after:right-0 after:top-2 after:bottom-2 after:w-px after:bg-primary">
-                                                            {product.category_id}
+                                                            {(() => {
+                
+                                                                const category = categoryMap[product.category_id]
+                                                                if (!category) return "—"
+
+                                                                return (
+                                                                <Category
+                                                                    name={category.name}
+                                                                    text={category.text_color}
+                                                                    bg={category.bg_color}
+                                                                />
+                                                                )
+                                                            })()}
                                                         </TableCell>
                                                         <TableCell className="text-text-dark text-[0.7rem] relative font-semibold after:content-[''] after:absolute after:right-0 after:top-2 after:bottom-2 after:w-px after:bg-primary">
                                                             <Button 

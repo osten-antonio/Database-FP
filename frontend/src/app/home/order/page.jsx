@@ -32,13 +32,29 @@ export default function Order() {
     const [createOpen, setCreateOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [filters, setFilters] = useState({});
+    const [rowSelection, setRowSelection] = useState({});
+    const [addressDialogOpen, setAddressDialogOpen] = useState(false);
+    const [selectedAddress, setSelectedAddress] = useState("");
 
     const fetchOrders = async (query = '', appliedFilters = {}) => {
         try {
             let endpoint = '/order';
             
             // If filters are applied, use the filter endpoint
-            if (Object.keys(appliedFilters).length > 0) {
+            const hasActiveFilters = (filters) => {
+                return (
+                    filters.minCost ||
+                    filters.maxCost ||
+                    (filters.suppliers && filters.suppliers.length > 0) ||
+                    (filters.warehouses && filters.warehouses.length > 0) ||
+                    filters.deliver === true ||
+                    filters.overdue === true ||
+                    filters.inProgress === true ||
+                    filters.orderedRange ||
+                    filters.deliveryRange
+                )
+                }
+            if (hasActiveFilters(appliedFilters)) {
                 endpoint = '/order/filter';
                 const params = new URLSearchParams();
                 
@@ -97,6 +113,7 @@ export default function Order() {
             
             const res = await api.get(endpoint);
             if (res.status >= 200 && res.status <= 300) {
+                console.log(res.data)
                 setOrders(res.data || []);
             }
         } catch (err) {
@@ -130,7 +147,8 @@ export default function Order() {
             await fetchOrders(searchQuery, filters);
             setCreateOpen(false);
         } catch (err) {
-            console.error("Failed to create order:", err);
+
+            alert(err.response.data.detail);
         }
     };
 
@@ -148,7 +166,7 @@ export default function Order() {
 
     const handleDelete = async () => {
         try {
-            await api.delete(`/order/${selectedOrder.order_id}/product/${selectedOrder.product_id}`);
+            await api.delete(`/order/${selectedOrder.order_id}/${selectedOrder.product_id}`);
             await fetchOrders(searchQuery, filters);
             setConfirmation(false);
             setSelectedOrder(null);
@@ -213,7 +231,8 @@ export default function Order() {
                     </DropdownMenuTrigger>
 
                     <DropdownMenuContent className="w-40" align="end">
-                        <DropdownMenuItem onClick={() => {
+                        <DropdownMenuItem onClick={(e) => {
+                            e.stopPropagation()
                             setSelectedOrder(row.original);
                             setIsEditing(true);
                             setCreateOpen(true);
@@ -221,6 +240,7 @@ export default function Order() {
                         Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => {
+                            e.stopPropagation()
                             setSelectedOrder(row.original);
                             setConfirmation(true);
                         }}>
@@ -233,16 +253,55 @@ export default function Order() {
         }
     ];
 
+    useEffect(() => {
+        const keys = Object.keys(rowSelection);
+        if (keys.length === 0) return;
+
+        const rawId = keys[0];
+        if (!rawId) return;
+
+        const id = rawId.split('-')[0];
+
+        const selectedRow = orders.find(
+            (o) => String(o.order_id) === String(id)
+        );
+
+        if (!selectedRow) return;
+
+        setSelectedAddress(selectedRow.delivery_address);
+        setAddressDialogOpen(true);
+    }, [rowSelection, orders]);
+
+
     const tableProps = {
         data: orders,
-        enableRowSelection: false,
+        enableRowSelection: true,
         idName: 'order_id',
         columns,
-        setRowSelection: undefined,
-        rowSelection: undefined
+        setRowSelection: setRowSelection,
+        rowSelection: rowSelection
     }
     return(
         <>
+            <Dialog open={addressDialogOpen} onOpenChange={setAddressDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                    <DialogTitle className="text-text-dark">
+                        Delivery Address
+                    </DialogTitle>
+                    <DialogDescription>
+                        {selectedAddress || "No address provided"}
+                    </DialogDescription>
+                    </DialogHeader>
+
+                    <DialogFooter>
+                    <Button onClick={() => setAddressDialogOpen(false)}>
+                        Close
+                    </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
             <Dialog open={confirmation} onOpenChange={setConfirmation} >
                 <DialogContent className="[&~.fixed.inset-0]:bg-transparent">
                     <DialogHeader>
@@ -273,7 +332,7 @@ export default function Order() {
                 setFilters={handleApplyFilters}
             />
             <BasicLayout name='Orders' 
-                tableProps={{...tableProps, data: orders, enableRowSelection: false}} 
+                tableProps={{...tableProps, data: orders, enableRowSelection: true}} 
                 FilterWindow={() => null}
                 CreateWindow={() => null}
                 onSearch={handleSearch}

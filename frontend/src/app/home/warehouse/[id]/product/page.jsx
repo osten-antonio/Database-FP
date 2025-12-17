@@ -32,6 +32,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { AddProduct } from '@/components/sections/warehouse/AddProduct';
 import { RestockOrderTable } from '@/components/sections/warehouse/RestockOrder'
+import { Category } from '@/components/widget/Category';
+import { useData } from '@/app/context/DataContext';
+
 
 export default function WarehouseProducts(){
     const [products, setProducts] = useState([]);
@@ -44,9 +47,14 @@ export default function WarehouseProducts(){
     const id = useParams().id;
     const restockTableRef = useRef(null);
     const [completedOrder, setCompletedOrder] = useState(false);
+    const [categoryMap, setCategoryMap] = useState({}); 
+    const { categories } = useData();
 
-
-    
+    useEffect(()=>{
+        setCategoryMap(Object.fromEntries(
+            categories.map(c => [c.category_id, c])
+            ))
+    },[categories])
 
     useEffect(()=>{
         async function getWarehouseProducts(){
@@ -91,8 +99,12 @@ export default function WarehouseProducts(){
             let endpoint = `/warehouse/${id}/products`;
             let res;
 
-            // Build filter parameters if filters are applied
-            if (Object.keys(appliedFilters).length > 0) {
+            const hasActiveFilters =
+            appliedFilters.minCost !== "" ||
+            appliedFilters.maxCost !== "" ||
+            (appliedFilters.suppliers?.length ?? 0) > 0 ||
+            (appliedFilters.categories?.length ?? 0) > 0
+            if (hasActiveFilters) {
                 const params = new URLSearchParams();
                 console.log(appliedFilters)
                 if (appliedFilters.minCost) params.append('min_cost', appliedFilters.minCost);
@@ -189,6 +201,20 @@ export default function WarehouseProducts(){
         {
             accessorKey: "category_id",
             header: "Category",
+            cell: ({ row }) => {
+                const categoryId = row.getValue("category_id")
+                const category = categoryMap[categoryId]
+
+                if (!category) return null
+
+                return (
+                    <Category
+                    name={category.name}
+                    text={category.text_color}
+                    bg={category.bg_color}
+                    />
+                )
+            }
         },
         {
             accessorKey: "stock",

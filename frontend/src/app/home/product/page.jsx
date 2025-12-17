@@ -22,9 +22,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Input } from '@/components/ui/input';
+import { Category } from '@/components/widget/Category';
+import { useData } from '@/app/context/DataContext';
 
 export default function Products(){
+    const { categories } = useData();
     const [products, setProducts] = useState([]);
     const [confirmation, setConfirmation] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
@@ -33,14 +35,20 @@ export default function Products(){
     const [searchQuery, setSearchQuery] = useState('');
     const [isEditing, setIsEditing] = useState(false);
     const [filters, setFilters] = useState({});
+    const [categoryMap, setCategoryMap] = useState({}); 
 
     const fetchProducts = async (query = '', appliedFilters = {}) => {
         try {
             let endpoint = '/product';
             let res;
 
-            // Build filter parameters if filters are applied
-            if (Object.keys(appliedFilters).length > 0) {
+            const hasActiveFilters =
+            appliedFilters.minCost !== "" ||
+            appliedFilters.maxCost !== "" ||
+            (appliedFilters.suppliers?.length ?? 0) > 0 ||
+            (appliedFilters.categories?.length ?? 0) > 0
+
+            if (hasActiveFilters) {
                 const params = new URLSearchParams();
                 
                 if (appliedFilters.minCost) params.append('min_cost', appliedFilters.minCost);
@@ -63,6 +71,7 @@ export default function Products(){
                     
                     setProducts(data);
                 }
+                return;
             } else if (query) {
                 let cleanedQuery = query.trim();
                 if (cleanedQuery.startsWith('?')) {
@@ -80,10 +89,10 @@ export default function Products(){
 
 
             }
-            // res = await api.get(endpoint);
-            // if (res.status >= 200 && res.status <= 300) {
-            //     setProducts(res.data || []);
-            // }
+            res = await api.get(endpoint);
+            if (res.status >= 200 && res.status <= 300) {
+                setProducts(res.data || []);
+            }
         } catch (err) {
             console.error("Failed to fetch products:", err);
         }
@@ -142,6 +151,12 @@ export default function Products(){
         }
     };
 
+    useEffect(()=>{
+        setCategoryMap(Object.fromEntries(
+            categories.map(c => [c.category_id, c])
+            ))
+    },[categories])
+
     const columns = [
         {
             accessorKey: "product_id",
@@ -173,6 +188,20 @@ export default function Products(){
         {
             accessorKey: "category_id",
             header: "Category",
+            cell: ({ row }) => {
+                const categoryId = row.getValue("category_id")
+                const category = categoryMap[categoryId]
+
+                if (!category) return null
+
+                return (
+                    <Category
+                    name={category.name}
+                    text={category.text_color}
+                    bg={category.bg_color}
+                    />
+                )
+            }
         },
         {
             accessorKey: "actions",
