@@ -295,37 +295,6 @@ def delete_warehouse(id):
     except Exception as e:
         raise e
     
-
-    try:
-        conn = connect()
-
-        cursor=conn.cursor()
-        cursor.execute('''
-            SELECT c.customer_id, c.name, c.email,
-                   a.address_id, a.delivery_address, a.phone_num
-            FROM Customer c
-            LEFT JOIN Address a ON c.customer_id = a.customer_id
-            WHERE c.customer_id IN (
-                       SELECT a.customer_id FROM `Order` o JOIN Address a ON o.address_id = a.address_id 
-                       WHERE warehouse_id = %s
-                       )
-        ''',(id))
-        rows = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        result = []
-        for row in rows:
-            result.append({
-                'id':row[0],
-                'name':row[1],
-                'email': row[2],
-                'address_id': row[3],
-                'address': row[4],
-                'phone_num': row[5],
-            })
-        return result
-    except Exception as e:
-        raise e
 def get_name(id):
     try:
         conn = connect()

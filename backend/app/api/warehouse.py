@@ -87,15 +87,12 @@ async def remove_warehouse(warehouse_id: int, token: dict = Depends(verify_token
         delete_warehouse(warehouse_id)
         return {"status": "success"}
     except Exception as e:
+        print(e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)
         )
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)
-        )
+
 
 @router.get("/{warehouse_id}/products", response_model=List[dict], responses={401: {"model": ErrorResponse}})
 async def get_products(warehouse_id: int, limit: int = None, token: dict = Depends(verify_token)):
@@ -159,7 +156,7 @@ async def get_warehouse_order_detail_stats(warehouse_id: int, token: dict = Depe
         )
 
 @router.delete("/{warehouse_id}/products/{product_id}", response_model=dict, responses={401: {"model": ErrorResponse}})
-async def get_warehouse_order_detail_stats(warehouse_id: int,product_id: int, token: dict = Depends(verify_token)):
+async def delete_product(warehouse_id: int,product_id: int, token: dict = Depends(verify_token)):
     """Get warehouse order statistics"""
     try:
         res = delete_inv(warehouse_id,product_id)
