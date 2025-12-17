@@ -5,7 +5,7 @@ import api from '@/lib/axios'
 import { BasicLayout, DataTable } from '@/components/layout/BasicLayout';
 import { FilterWindow } from '@/components/sections/product/filter';
 import { Button } from '@/components/ui/button';
-import { EllipsisVertical } from 'lucide-react';
+import { Trash } from 'lucide-react';
 import { ListFilter } from 'lucide-react';
 import {
   DropdownMenu,
@@ -38,29 +38,106 @@ export default function WarehouseProducts(){
     const [restockOpen, setRestockOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
-        const [isFilter, setFilter] = useState(false);
+    const [isFilter, setFilter] = useState(false);
     const [filters, setFilters] = useState(undefined);
     const [add, setAdd] = useState(false);
     const id = useParams().id;
     const restockTableRef = useRef(null);
+    const [completedOrder, setCompletedOrder] = useState(false);
 
-    const fetchProducts = async (query = '') => {
+
+    
+
+    useEffect(()=>{
+        async function getWarehouseProducts(){
+            try {
+                const res = await api.get(`/warehouse/${id}/products`);
+                if (res.status >= 200 && res.status <= 300) {
+                    setProducts(res.data.slice(0,5));
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+        getWarehouseProducts();
+        setCompletedOrder(false);
+    },[completedOrder]);
+
+    // const fetchProducts1 = async (query = '') => {
+    //     try {
+    //         let endpoint = `/warehouse/${id}/products`;
+            
+    //         const res = await api.get(endpoint);
+    //         if (res.status >= 200 && res.status <= 300) {
+    //             let data = res.data || [];
+                
+    //             // Apply search filter client-side
+    //             if (query) {
+    //                 data = data.filter(p => 
+    //                     p.name.toLowerCase().includes(query.toLowerCase()) ||
+    //                     p.supplier.toLowerCase().includes(query.toLowerCase())
+    //                 );
+    //             }
+                
+    //             setProducts(data);
+    //         }
+    //     } catch (err) {
+    //         console.error("Failed to fetch products:", err);
+    //     }
+    // };
+
+    const fetchProducts = async (query = '', appliedFilters = {}) => {
         try {
             let endpoint = `/warehouse/${id}/products`;
-            
-            const res = await api.get(endpoint);
-            if (res.status >= 200 && res.status <= 300) {
-                let data = res.data || [];
+            let res;
+
+            // Build filter parameters if filters are applied
+            if (Object.keys(appliedFilters).length > 0) {
+                const params = new URLSearchParams();
+                console.log(appliedFilters)
+                if (appliedFilters.minCost) params.append('min_cost', appliedFilters.minCost);
+                if (appliedFilters.maxCost) params.append('max_cost', appliedFilters.maxCost);
+                if (appliedFilters.suppliers && appliedFilters.suppliers.length > 0) {
+                    const supplierNames = appliedFilters.suppliers.map(s => s.name).join(',');
+                    params.append('suppliers', supplierNames);
+                }
+
                 
-                // Apply search filter client-side
-                if (query) {
-                    data = data.filter(p => 
-                        p.name.toLowerCase().includes(query.toLowerCase()) ||
-                        p.supplier.toLowerCase().includes(query.toLowerCase())
-                    );
+                if (appliedFilters.categories && appliedFilters.categories.length > 0) {
+                    const categoryIds = appliedFilters.categories.map(c => c.category_id).join(',');
+                    params.append('categories', categoryIds);
                 }
                 
-                setProducts(data);
+                
+                res = await api.get(`/warehouse/${id}/products/filter?${params.toString()}`);
+                if (res.status >= 200 && res.status <= 300) {
+                    let data = res.data || [];
+                    
+
+                    setProducts(data);
+                }
+                return;
+            } else if (query) {
+                let cleanedQuery = query.trim();
+                if (cleanedQuery.startsWith('?')) {
+                    cleanedQuery = cleanedQuery.slice(1);
+                }
+
+                const match = cleanedQuery.match(/^(name|supplier)\s*=\s*(.+)$/);
+
+                if (match) {
+                    const [, key, value] = match;
+                    endpoint = `/warehouse/${id}/products/search?${key}=${encodeURIComponent(value)}`;
+                } else {
+                    endpoint = `/warehouse/${id}/products/search?name=${encodeURIComponent(cleanedQuery)}`;
+                }
+
+
+            }
+            res = await api.get(endpoint);
+            if (res.status >= 200 && res.status <= 300) {
+                console.log(res.data)
+                setProducts(res.data || []);
             }
         } catch (err) {
             console.error("Failed to fetch products:", err);
@@ -75,15 +152,20 @@ export default function WarehouseProducts(){
         setSearchQuery(query);
         fetchProducts(query);
     };
+      
+    const handleApplyFilters = (appliedFilters) => {
+        setFilters(appliedFilters);
+        fetchProducts(searchQuery, appliedFilters);
+    };
 
     const columns = [
         {
-            accessorKey: "id",
+            accessorKey: "product_id",
             header: "ID",
-            cell: ({ row }) => <span>{row.getValue("id")}</span>,
+            cell: ({ row }) => <span>{row.getValue("product_id")}</span>,
         },
         {
-            accessorKey: "name",
+            accessorKey: "product_name",
             header: "Name",
         },
         {
@@ -117,21 +199,15 @@ export default function WarehouseProducts(){
             header: "",
             cell: ({row})=>{                
                 return(
-                    <DropdownMenu modal={false}>
-                        <DropdownMenuTrigger asChild>
-                        <Button className='mx-0'>
-                            <EllipsisVertical />
-                        </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-40" align="end">
-                            <DropdownMenuItem onClick={() => { 
-                                setSelectedProduct(row.original);
-                                setRestockOpen(true);
-                            }}>
-                                Restock
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <Button 
+                        onClick={() => {
+                            setSelectedProduct(product);
+                            setConfirmation(true);
+                        }} 
+                        className='shadow-xs shadow-accent-dark text-xs h-6 px-2'
+                    >
+                        <Trash></Trash>
+                    </Button>
                 )
             }
         }
@@ -167,7 +243,7 @@ export default function WarehouseProducts(){
                 restockTableRef.current?.fetchRestockOrders?.();
             }} />
             <div className="w-full">          
-                <FilterWindow isOpen={isFilter} setOpen={setFilter} filters={filters} setFilters={setFilters}/>
+                <FilterWindow isOpen={isFilter} setOpen={setFilter} filters={filters} setFilters={handleApplyFilters}/>
                 <h1 className='text-text-dark text-3xl font-bold mb-4'>
                     {name}
                 </h1>
@@ -200,7 +276,13 @@ export default function WarehouseProducts(){
                             Add
                         </button>
                         <form className='w-full min-w-[250px] grow'>
-                            <input type='text' className='bg-primary-light h-full w-full rounded-md text-text-light px-2 shadow-md shadow-accent-dark' placeholder='Search'/>
+                            <input type='text' className='bg-primary-light h-full w-full rounded-md text-text-light px-2 shadow-md shadow-accent-dark' placeholder='Search'
+                                value={searchQuery}
+                                onChange={(e) => {
+                                    setSearchQuery(e.target.value);
+                                    handleSearch(e.target.value);
+                        }}
+                            />
                         </form>
                         <button 
                             onClick={()=>{setFilter(true)}}
@@ -213,7 +295,7 @@ export default function WarehouseProducts(){
                 </div>
                 <DataTable {...tableProps}/>
             </div>
-            <RestockOrderTable id={id} ref={restockTableRef} />
+            <RestockOrderTable id={id} ref={restockTableRef} onCompleteOrder={()=>{setCompletedOrder(true)}}/>
         </>
     )
 }

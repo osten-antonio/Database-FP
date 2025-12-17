@@ -37,7 +37,8 @@ def complete_order(restock_id):
             WHERE product_id = %s AND warehouse_id = %s
         ''', (product_id, warehouse_id))
         inventory_row = cursor.fetchone()
-
+        print(inventory_row)
+        print((product_id, warehouse_id))
         if inventory_row:
             cursor.execute('''
                 UPDATE Inventory

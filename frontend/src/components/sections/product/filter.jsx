@@ -20,173 +20,170 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ListSelector } from "@/components/widget/ListSelector"
+import { useData } from "@/app/context/DataContext";
 
-export function FilterWindow({isOpen, setOpen, filters = {}, setFilters}){ 
-    const [warehouses, setWarehouses] = useState(filters.warehouses ?? []);
-    const [suppliers, setSuppliers] = useState(filters.suppliers ?? []);
-    const [minCost, setMinCost] = useState(filters.minCost??'');
-    const [maxCost, setMaxCost] = useState(filters.maxCost??'');
-    const [availableWarehouses, setAvailableWarehouses] = useState([]);
-    const [availableSuppliers, setAvailableSuppliers] = useState([]);
+export function FilterWindow({ isOpen, setOpen, filters = {}, setFilters }) { 
+  const { suppliers: availableSuppliers, categories: availableCategories } = useData();
 
+  const [suppliers, setSuppliers] = useState(filters.suppliers ?? []);
+  const [categories, setCategories] = useState(filters.categories ?? []);
+  const [minCost, setMinCost] = useState(filters.minCost ?? '');
+  const [maxCost, setMaxCost] = useState(filters.maxCost ?? '');
 
-    useEffect(()=>{
-        async function getWarehouses(){
-            try {
-                const res = await api.get("/warehouse");
-                if (res.status >= 200 && res.status <= 300) {
-                    setAvailableWarehouses(res.data);
-                }
-            } catch (err) {
-                console.error(err);
-            }
-        }
-        async function getSupplier(){
-            try {
-                const res = await api.get("/supplier");
-                if (res.status >= 200 && res.status <= 300) {
-                    setAvailableSuppliers(res.data);
-                }
-            } catch (err) {
-                console.error(err);
-            }
-        }
-        getWarehouses();
-        getSupplier();
-    },[])
+  useEffect(() => {
+    if (!isOpen) return;
 
-    const AddItem = ({availableItems, itemIDName, name})=>{
-        const [selected,setSelected] = useState(undefined);
-
-        const handleSelect = () => {
-            const selectedItem = availableItems.find(
-            (i) => i[itemIDName] === selected
-            );
-
-            if (!selectedItem) return;
-
-            setWarehouses((prev) => {
-                if (prev.find((i) => i[itemIDName] === selectedItem[itemIDName])) 
-                    return prev;
-                return [...prev, selectedItem];
-            });
-        };
-
-        return (
-            <Dialog>
-                <DialogTrigger className="bg-primary-light text-text px-2 p-1 rounded-md text-sm">+ Add</DialogTrigger>
-                <DialogContent className='w-fit bg-secondary border-2 border-accent-dark'>
-                    <DialogHeader>
-                    <DialogTitle className='text-text-dark'>Select {name}</DialogTitle>
-                       <Select onValueChange={setSelected}>
-                            <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder={`Select a ${name}`} />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectGroup>
-                                    {
-                                        availableItems.map((item)=>{
-                                            return(
-                                                <SelectItem key={item[itemIDName]} value={item[itemIDName]}>
-                                                    {item[itemIDName]} {item.name} @ {item.address}
-                                                </SelectItem>
-                                            )
-                                        })
-                                    }
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
-                    </DialogHeader>
-                    <DialogFooter>
-                        <DialogClose asChild>
-                            <Button>
-                                Cancel
-                            </Button>
-                        </DialogClose>
-                        <DialogClose asChild>
-                            <Button onClick={handleSelect}>
-                                Add
-                            </Button>
-                        </DialogClose>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        )
-    }
+    setSuppliers(filters.suppliers ?? []);
+    setCategories(filters.categories ?? []);
+    setMinCost(filters.minCost ?? '');
+    setMaxCost(filters.maxCost ?? '');
+    }, [isOpen]);
 
 
-    return(
-        <div
-            onClick={() => setOpen(false)}
-            className={` overflow-y-auto
-                backdrop-blur-sm fixed top-0 left-0 w-screen h-screen z-20 flex items-center justify-center
-                transition-opacity duration-200 ease-out
-                ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}
-            `}
-        >
-            <div onClick={(e) => e.stopPropagation()} className='flex flex-col bg-primary-light max-w-[345px] rounded-2xl p-5 shadow-md shadow-accent-dark border-primary-dark border-2'>
-                <p className="font-bold text-2md text-text">Filter</p>
-                <span className="ml-1">
-                    <p className="font-semibold text-sm mt-2 text-text-light">Cost</p>
-                    <form className="mt-1 flex flex-row gap-2 text-text-light">                        
-                        <CurrencyInput
-                            className='bg-secondary py-1 h-full w-full rounded-md text-text-dark px-2'
-                            id="min"
-                            name="mincost"
-                            prefix="Rp. "
-                            placeholder="Min"
-                            decimalsLimit={3}
-                            value={minCost}
-                            onValueChange={(value, name, values)=>{
-                                setMinCost(values.float);
-                            }}
-                        />
-                        -
-                        <CurrencyInput
-                            className='bg-secondary py-1 h-full w-full rounded-md text-text-dark px-2'
-                            id="min"
-                            name="maxcost"
-                            prefix="Rp. "
-                            placeholder="Max"
-                            decimalsLimit={3}
-                            value={maxCost}
-                            onValueChange={(value, name, values)=>{
-                                setMaxCost(values.float);
-                            }}
-                        />
-                    </form>
-                    <p className="font-semibold text-sm mt-2 text-text-light">Suppliers</p>
-                    <ListSelector 
-                        Dialog={()=>(<><AddItem availableItems={availableSuppliers} itemIDName='supplier_id' name='supplier'/></>)} 
-                        items={suppliers} setItems={setSuppliers}
-                    />
-                    <p className="font-semibold text-sm mt-2 text-text-light">Category</p> 
-                    {/* TODO */}
-                    <ListSelector 
-                        Dialog={()=>(<><AddItem availableItems={availableWarehouses} itemIDName='warehouse_id' name='category'/></>)} 
-                        items={warehouses} setItems={setWarehouses}
-                    />
+  const AddItem = ({ availableItems, itemIDName, name, setItems }) => {
+    const [selected, setSelected] = useState(undefined);
 
-                    <div className="flex flex-row flex-nowrap justify-between mt-3">
-                    <Button onClick={()=>{setOpen(false)}} className='shadow-sm bg-accent-light border-primary-dark border text-text-dark hover:bg-accent-dark transition-color duration-200 ease-in-out'>Close</Button>
-                    <Button className='shadow-sm hover:bg-accent-dark transition-colors duration-200 ease-in-out'
-                        onClick={() => {
+    const handleSelect = () => {
+      const selectedItem = availableItems.find(
+        i => String(i[itemIDName]) === selected
+      );
+      if (!selectedItem) return;
 
-                        setFilters({
-                            warehouses,
-                            suppliers,
-                            minCost: minCost,
-                            maxCost: maxCost,
-                        });
+      setItems(prev => {
+        if (prev.some(i => i[itemIDName] === selectedItem[itemIDName])) return prev;
+        return [...prev, selectedItem];
+      });
+      setSelected(undefined);
+    };
 
-                        setOpen(false);
-                        }}
+    return (
+      <Dialog>
+        <DialogTrigger className="bg-primary-light text-text px-2 p-1 rounded-md text-sm">
+          + Add
+        </DialogTrigger>
+        <DialogContent className="w-fit bg-secondary border-2 border-accent-dark">
+          <DialogHeader>
+            <DialogTitle className="text-text-dark">
+              Select {name}
+            </DialogTitle>
+            <Select onValueChange={setSelected}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder={`Select a ${name}`} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {availableItems.map(item => (
+                    <SelectItem
+                      key={item[itemIDName]}
+                      value={String(item[itemIDName])}
                     >
-                        Filter</Button>
-                    </div>          
-                </span>
-            </div>
-        </div>
-    )
-}
+                      {item.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button>Cancel</Button>
+            </DialogClose>
+            <DialogClose asChild>
+              <Button onClick={handleSelect}>Add</Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  };
 
+  return (
+    <div
+      onClick={() => setOpen(false)}
+      className={`backdrop-blur-sm fixed top-0 left-0 w-screen h-screen z-20 flex items-center justify-center
+        transition-opacity duration-200 ease-out
+        ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+      `}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="flex flex-col bg-primary-light max-w-[345px] rounded-2xl p-5 shadow-md shadow-accent-dark border-primary-dark border-2"
+      >
+        <p className="font-bold text-2md text-text">Filter</p>
+
+        <p className="font-semibold text-sm mt-2 text-text-light">Cost</p>
+        <form className="mt-1 flex flex-row gap-2 text-text-light">                        
+          <CurrencyInput
+            className="bg-secondary py-1 w-full rounded-md text-text-dark px-2"
+            prefix="Rp. "
+            placeholder="Min"
+            decimalsLimit={0}
+            value={minCost}
+            onValueChange={(v, _, values) => setMinCost(values?.float ?? '')}
+          />
+          -
+          <CurrencyInput
+            className="bg-secondary py-1 w-full rounded-md text-text-dark px-2"
+            prefix="Rp. "
+            placeholder="Max"
+            decimalsLimit={0}
+            value={maxCost}
+            onValueChange={(v, _, values) => setMaxCost(values?.float ?? '')}
+          />
+        </form>
+
+        <p className="font-semibold text-sm mt-2 text-text-light">Suppliers</p>
+            <ListSelector
+                Dialog={() => (
+                    <AddItem
+                    availableItems={availableSuppliers}
+                    itemIDName="id"
+                    name="supplier"
+                    setItems={setSuppliers}
+                    />
+                )}
+                items={suppliers}
+                setItems={setSuppliers}
+                itemIDName="id"
+            />
+
+        <p className="font-semibold text-sm mt-2 text-text-light">Category</p>
+            <ListSelector
+            Dialog={() => (
+                <AddItem
+                availableItems={availableCategories}
+                itemIDName="category_id"
+                name="category"
+                setItems={setCategories}
+                />
+            )}
+            items={categories}
+            setItems={setCategories}
+            itemIDName="category_id"
+            />
+
+        <div className="flex justify-between mt-3">
+          <Button
+            onClick={() => setOpen(false)}
+            className="bg-accent-light text-text-dark"
+          >
+            Close
+          </Button>
+          <Button
+            onClick={() => {
+              setFilters({
+                suppliers,
+                categories,
+                minCost,
+                maxCost
+              });
+              setOpen(false);
+            }}
+          >
+            Filter
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

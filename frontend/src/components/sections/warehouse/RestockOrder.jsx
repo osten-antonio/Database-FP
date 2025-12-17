@@ -7,7 +7,7 @@ import { useState, useEffect, useRef, forwardRef } from "react";
 import api from "@/lib/axios";
 
 export const RestockOrderTable = forwardRef(function RestockOrderTable(props, ref){
-    const { id, warehouseId } = props || {};
+    const { id, warehouseId, onCompleteOrder } = props || {};
     const fetchId = id || warehouseId;
     const [restock, setRestock] = useState(false);
     const [restockOrders, setRestockOrders] = useState([]);
@@ -56,6 +56,7 @@ export const RestockOrderTable = forwardRef(function RestockOrderTable(props, re
             setConfirming(false);
             setSelectedOrder(null);
             fetchRestockOrders();
+            onCompleteOrder();
         } catch (err) {
             console.error("Failed to complete restock order:", err);
             alert('Failed to complete restock order');

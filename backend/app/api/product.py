@@ -23,13 +23,15 @@ async def filter_products(
     min_cost: float = Query(0),
     max_cost: float = Query(1e10),
     suppliers: str = Query(""),
-    category_id: str = Query(""),
+    categories: str = Query(""),
     token: dict = Depends(verify_token)
 ):
     """Filter products by price range, suppliers, and categories"""
-    supplier_list = [s.strip() for s in suppliers.split(",") if s.strip()] if suppliers else []
-    category_list = [int(c.strip()) for c in category_id.split(",") if c.strip()] if category_id else []
+    supplier_list = [int(s.strip()) for s in suppliers.split(",") if s.strip()] if suppliers else []
+    category_list = [int(c.strip()) for c in categories.split(",") if c.strip()] if categories else []
     
+    print(categories)
+    print(category_list)
     result = filter_product(
         min_cost=min_cost,
         max_cost=max_cost,

@@ -122,7 +122,20 @@ export default function Warehouse(){
         },
         {
             accessorKey:'address',
-            header:'Address'
+            header:'Address',
+            cell: ({row})=>{                
+                return(
+                    <span>{row.original.address.length <= 50? row.original.address:row.original.address.slice(0,47)+'...'}</span>
+                )
+            }
+        },
+        {
+            accessorKey:'total_stock',
+            header:'Stock',
+        },
+        {
+            accessorKey:'total_orders',
+            header:'Orders',
         },
         {
             accessorKey: 'actions',
@@ -136,14 +149,16 @@ export default function Warehouse(){
                         </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-40" align="end">
-                            <DropdownMenuItem onClick={() => {
+                            <DropdownMenuItem onClick={(e) => {
+                                e.stopPropagation()
                                 setSelectedWarehouse(row.original);
                                 setIsEditing(true);
                                 setCreate(true);
                             }}>
                                 Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => {
+                            <DropdownMenuItem onClick={(e) => {
+                                e.stopPropagation()
                                 setSelectedWarehouse(row.original);
                                 setConfirmation(true);
                             }}>
@@ -211,7 +226,7 @@ export default function Warehouse(){
                         className='hover:bg-accent-dark transition-colors duration-200 ease-in-out h-full shadow-accent-dark shadow-md'
                         onClick={() => setCreate(true)}>Create</Button>
                     <form className='w-full min-w-[250px] grow h-10'>
-                        <input type='text' className='bg-primary-light h-full w-full rounded-md text-text-light px-2 shadow-md shadow-accent-dark' placeholder='Search'/>
+                        <input onChange={(e)=>{handleSearch(e.target.value)}} type='text' className='bg-primary-light h-full w-full rounded-md text-text-light px-2 shadow-md shadow-accent-dark' placeholder='Search'/>
                     </form>
                 </div>
                 <DataTable {...tableProps}/>

@@ -46,9 +46,15 @@ export default function Products(){
                 if (appliedFilters.minCost) params.append('min_cost', appliedFilters.minCost);
                 if (appliedFilters.maxCost) params.append('max_cost', appliedFilters.maxCost);
                 if (appliedFilters.suppliers && appliedFilters.suppliers.length > 0) {
-                    const supplierNames = appliedFilters.suppliers.map(s => s.name).join(',');
-                    params.append('suppliers', supplierNames);
+                    const supplierIds = appliedFilters.suppliers.map(s => s.id).join(',');
+                    params.append('suppliers', supplierIds);
                 }
+
+                if (appliedFilters.categories && appliedFilters.categories.length > 0) {
+                    const categoryIds = appliedFilters.categories.map(c => c.category_id).join(',');
+                    params.append('categories', categoryIds);
+                }
+                
                 
                 res = await api.get(`/product/filter?${params.toString()}`);
                 if (res.status >= 200 && res.status <= 300) {
@@ -74,10 +80,10 @@ export default function Products(){
 
 
             }
-            res = await api.get(endpoint);
-            if (res.status >= 200 && res.status <= 300) {
-                setProducts(res.data || []);
-            }
+            // res = await api.get(endpoint);
+            // if (res.status >= 200 && res.status <= 300) {
+            //     setProducts(res.data || []);
+            // }
         } catch (err) {
             console.error("Failed to fetch products:", err);
         }

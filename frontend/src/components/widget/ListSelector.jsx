@@ -7,7 +7,7 @@ export function ListSelector({Dialog, items, setItems, itemIDName}){
         {
             items.map((item)=>{
                 return(
-                <div key={items[itemIDName]} className="w-fit p-1 bg-accent-light text-text-dark px-2 rounded-md text-sm flex flex-row flex-nowarp gap-2">
+                <div key={item[itemIDName]} className="w-fit p-1 bg-accent-light text-text-dark px-2 rounded-md text-sm flex flex-row flex-nowarp gap-2">
                     {item[itemIDName]} - {item.name}
                     <button 
                         className="aspect-square bg-accent-light hover:bg-accent-ui px-1 rounded text-sm"

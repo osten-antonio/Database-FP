@@ -74,8 +74,25 @@ export default function InnerWarehouse(){
     const [restockOpen, setRestockOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [confirmation, setConfirmation] = useState(false);
+    const [completedOrder, setCompletedOrder] = useState(false);
     const id = useParams().id;
     const router = useRouter();
+
+    useEffect(()=>{
+        async function getWarehouseProducts(){
+            try {
+                const res = await api.get(`/warehouse/${id}/products`);
+                if (res.status >= 200 && res.status <= 300) {
+                    setProducts(res.data.slice(0,5));
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+        getWarehouseProducts();
+        setCompletedOrder(false);
+    },[completedOrder]);
+
 
     useEffect(()=>{
         async function getWarehouseData(){
@@ -187,11 +204,11 @@ export default function InnerWarehouse(){
 
     const cColumns=[
         {
-            accessorKey: 'id',
+            accessorKey: 'product_id',
             header: 'ID'
         },
         {
-            accessorKey: 'name',
+            accessorKey: 'product_name',
             header: 'Name'
         },
         {
@@ -301,7 +318,7 @@ export default function InnerWarehouse(){
 
     const handleDeleteProduct = async () => {
         try {
-            await api.delete(`/inventory/${id}/${selectedProduct.id}`);
+            await api.delete(`/warehouse/${id}/products/${selectedProduct.id}`);
             await getWarehouseProducts();
             setConfirmation(false);
             setSelectedProduct(null);
@@ -435,12 +452,12 @@ export default function InnerWarehouse(){
                                             
                                             return (
                                                 <>
-                                                    <TableRow key={product.id}>
+                                                    <TableRow key={product.product_id}>
                                                         <TableCell className="text-text-dark text-[0.7rem] relative font-semibold after:content-[''] after:absolute after:right-0 after:top-2 after:bottom-2 after:w-px after:bg-primary">
-                                                            {product.id}
+                                                            {product.product_id}
                                                         </TableCell>
                                                         <TableCell className="text-text-dark text-[0.7rem] relative font-semibold after:content-[''] after:absolute after:right-0 after:top-2 after:bottom-2 after:w-px after:bg-primary">
-                                                            {product.name}
+                                                            {product.product_name}
                                                         </TableCell>
                                                         <TableCell className="text-text-dark text-[0.7rem] relative font-semibold after:content-[''] after:absolute after:right-0 after:top-2 after:bottom-2 after:w-px after:bg-primary">
                                                             Rp. {product.ttl_sales}
@@ -493,9 +510,7 @@ export default function InnerWarehouse(){
                                 <CardDescription className="text-text-dark font-black text-xl flex flex-row gap-2 items-center">Customers</CardDescription>
                                 <div className="flex flex-row justify-between gap-2">
                                     <Button className='shadow-xs shadow-accent-dark'>New</Button>
-                                    <form className='w-full min-w-[250px] grow'>
-                                        <input type='text' className='bg-primary-light h-full w-full rounded-md text-text-light px-2 shadow-xs shadow-accent-dark' placeholder='Search'/>
-                                    </form>
+                                   
                                 </div>
                             </div>
                             <div>
@@ -663,7 +678,7 @@ export default function InnerWarehouse(){
                     </div>
                 </CardFooter>
             </Card>
-            <RestockOrderTable id={id} />
+            <RestockOrderTable id={id} onCompleteOrder={()=>{setCompletedOrder(true)}}/>
     </>
     )
 }

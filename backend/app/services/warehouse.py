@@ -83,14 +83,29 @@ def get_warehouse():
         conn = connect()
         cursor = conn.cursor(dictionary=True)
         cursor.execute('''
-            SELECT DISTINCT w.warehouse_id, w.name, w.address
+            SELECT 
+                w.warehouse_id,
+                w.name,
+                w.address,
+                COALESCE(inv.total_stock, 0) AS total_stock,
+                COALESCE(ord.total_orders, 0) AS total_orders
             FROM Warehouse w
+            JOIN Account a ON w.account_id = a.account_id
+            LEFT JOIN (
+                SELECT warehouse_id, SUM(stock) AS total_stock
+                FROM Inventory
+                GROUP BY warehouse_id
+            ) inv ON w.warehouse_id = inv.warehouse_id
+            LEFT JOIN (
+                SELECT warehouse_id, COUNT(order_id) AS total_orders
+                FROM `Order`
+                GROUP BY warehouse_id
+            ) ord ON w.warehouse_id = ord.warehouse_id
         ''')
 
         rows = cursor.fetchall()
         cursor.close()
         conn.close()
-        
         return rows
 
     except Exception as e:
@@ -151,21 +166,42 @@ def get_warehouse_customers(id):
     except Exception as e:
         raise e
     
+def delete_inv(warehouse_id, product_id):
+    try:
+        conn = connect()
+
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM Inventory WHERE warehouse_id=%s AND product_id=%s',(warehouse_id,product_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(e)
+        raise e
+
+
 def get_warehouse_products(id,limit=None):
     try:
         conn = connect()
 
         params = [id]
         sql = '''
-            SELECT i.product_id, p.product_name, p.category_id, a.name, p.price, i.stock, COUNT(ol.order_id)
+            SELECT 
+                i.product_id, 
+                p.product_name, 
+                p.category_id, 
+                a.name AS supplier, 
+                p.price, 
+                i.stock, 
+                COALESCE(SUM(ol.order_price), 0) AS ttl_sales
             FROM Inventory i
             JOIN Product p ON i.product_id = p.product_id
             JOIN Warehouse w ON i.warehouse_id = w.warehouse_id
-            JOIN `Order` o ON o.warehouse_id = w.warehouse_id
-            JOIN OrderLine ol ON o.order_id = ol.order_id
-            JOIN Account a on p.account_id = a.account_id
-            WHERE i.warehouse_id=%s
-            GROUP BY i.product_id, p.product_name, p.category_id, a.name, p.price, i.stock
+            LEFT JOIN `Order` o ON o.warehouse_id = w.warehouse_id
+            LEFT JOIN OrderLine ol ON o.order_id = ol.order_id
+            JOIN Account a ON p.account_id = a.account_id
+            WHERE i.warehouse_id = %s
+            GROUP BY i.product_id, p.product_name, p.category_id, a.name, p.price, i.stock;
         '''
         if limit:
             sql+=' LIMIT %s'
@@ -178,8 +214,8 @@ def get_warehouse_products(id,limit=None):
         result = []
         for row in rows:
             result.append({
-                'id':row[0],
-                'name':row[1],
+                'product_id':row[0],
+                'product_name':row[1],
                 'category_id': row[2],
                 'supplier': row[3],
                 'cost': row[4],
@@ -198,14 +234,22 @@ def filter_warehouse_product(id, min_cost=0,max_cost=float('inf'),suppliers=[],c
         cursor = conn.cursor()
         params=[id,min_cost,max_cost]
         sql = '''
-            SELECT i.product_id, p.name, p.category_id, a.name, p.cost, i.stock, COUNT(ol.order_id)
+
+            SELECT 
+                i.product_id, 
+                p.product_name, 
+                p.category_id, 
+                a.name AS supplier, 
+                p.price, 
+                i.stock, 
+                COALESCE(SUM(ol.order_price), 0) AS ttl_sales
             FROM Inventory i
             JOIN Product p ON i.product_id = p.product_id
-            JOIN Account a ON p.supplier_id = a.account_id
             JOIN Warehouse w ON i.warehouse_id = w.warehouse_id
-            JOIN `Order` o ON o.warehouse_id = w.warehouse_id
-            JOIN OrderLine ol ON o.order_id = ol.order_id
-            WHERE i.warehouse_id=%s AND p.cost >= %s AND p.cost <= %s
+            LEFT JOIN OrderLine ol ON ol.product_id = i.product_id
+            LEFT JOIN `Order` o ON o.order_id = ol.order_id
+            JOIN Account a ON p.account_id = a.account_id
+            WHERE i.warehouse_id = %s AND p.price >= %s AND p.price <= %s
         '''
         if suppliers:
             placeholders = ', '.join(['%s'] * len(suppliers))
@@ -216,6 +260,7 @@ def filter_warehouse_product(id, min_cost=0,max_cost=float('inf'),suppliers=[],c
             placeholders = ', '.join(['%s'] * len(category))
             sql += f" AND p.category_id IN ({placeholders})"
             params.extend(category)
+        sql+='GROUP BY i.product_id, p.product_name, p.category_id, a.name, p.price, i.stock;'
         cursor.execute(sql,params)
         rows = cursor.fetchall()
         cursor.close()
@@ -223,8 +268,8 @@ def filter_warehouse_product(id, min_cost=0,max_cost=float('inf'),suppliers=[],c
         result = []
         for row in rows:
             result.append({
-                'id':row[0],
-                'name':row[1],
+                'product_id':row[0],
+                'product_name':row[1],
                 'category_id': row[2],
                 'supplier': row[3],
                 'cost': row[4],
@@ -302,13 +347,25 @@ def search_warehouse(name):
         conn = connect()
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT w.warehouse_id, w.name, w.address, a.name, SUM(i.stock), COUNT(o.order_id)
+            SELECT 
+                w.warehouse_id,
+                w.name,
+                w.address,
+                COALESCE(inv.total_stock, 0) AS total_stock,
+                COALESCE(ord.total_orders, 0) AS total_orders
             FROM Warehouse w
             JOIN Account a ON w.account_id = a.account_id
-            JOIN Inventory i ON w.warehouse_id = i.warehouse_id
-            JOIN Order o ON i.warehouse_id = o.warehouse_id
-            GROUP BY w.name, w.address, a.name
-            WHERE w.name LIKE %s
+            LEFT JOIN (
+                SELECT warehouse_id, SUM(stock) AS total_stock
+                FROM Inventory
+                GROUP BY warehouse_id
+            ) inv ON w.warehouse_id = inv.warehouse_id
+            LEFT JOIN (
+                SELECT warehouse_id, COUNT(order_id) AS total_orders
+                FROM `Order`
+                GROUP BY warehouse_id
+            ) ord ON w.warehouse_id = ord.warehouse_id
+            WHERE w.name LIKE %s;
         ''',(f'%{name}%',))
 
         rows = cursor.fetchall()
@@ -317,7 +374,7 @@ def search_warehouse(name):
         result = []
         for row in rows:
             result.append({
-                'id':row[0],
+                'warehouse_id':row[0],
                 'name':row[1],
                 'address': row[2],
                 'stock': row[3],
@@ -326,6 +383,52 @@ def search_warehouse(name):
         return result
     except Exception as e:
         raise e
+    
+def search_warehouse_product(warehouse_id = 1, name='', supplier=''):
+    try:
+        conn = connect()
+        cur = conn.cursor(dictionary=True)
+
+        query = """
+            SELECT
+                i.product_id, 
+                p.product_name, 
+                p.category_id, 
+                a.name AS supplier, 
+                p.price, 
+                i.stock, 
+                COALESCE(SUM(ol.order_price), 0) AS ttl_sales
+            FROM Inventory i
+            JOIN Product p ON i.product_id = p.product_id
+            JOIN Warehouse w ON i.warehouse_id = w.warehouse_id
+            LEFT JOIN OrderLine ol ON ol.product_id = i.product_id
+            LEFT JOIN `Order` o ON o.order_id = ol.order_id
+            JOIN Account a ON p.account_id = a.account_id
+            WHERE i.warehouse_id = %s
+        """
+        
+        params = [warehouse_id]
+
+        if name:
+            query += " AND p.product_name LIKE %s"
+            params.append(f"%{name}%")
+
+        if supplier:
+            query += " AND a.name LIKE %s"
+            params.append(f"%{supplier}%")
+
+        query += """
+            GROUP BY p.product_id, p.product_name, p.price, p.category_id, a.name
+        """
+
+        cur.execute(query, params)
+        rows = cur.fetchall()
+        conn.close()
+
+        return rows
+
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 if __name__ == '__main__':
     '''
