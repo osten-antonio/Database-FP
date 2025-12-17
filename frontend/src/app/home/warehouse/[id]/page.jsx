@@ -119,7 +119,6 @@ export default function InnerWarehouse(){
             try {
                 const res = await api.get(`/warehouse/${id}/products`);
                 if (res.status >= 200 && res.status <= 300) {
-                    console.log(res.data)
                     setProducts(res.data.slice(0,5));
                 }
             } catch (err) {

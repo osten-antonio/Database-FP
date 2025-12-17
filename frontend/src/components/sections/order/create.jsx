@@ -85,7 +85,7 @@ function ItemsTable({ availableItems, selectedItem, setSelected }) {
         const addedItem = {
             product_id: selectedProduct.id,
             id: selectedProduct.product_id,
-            name: selectedProduct.name,
+            name: selectedProduct.product_name,
             amount: amount,
             price: selectedProduct.cost,
             total: total
@@ -208,7 +208,7 @@ function ItemsTable({ availableItems, selectedItem, setSelected }) {
                                     const itemId = item.product_id || item.id;
                                     return (
                                         <SelectItem key={itemId} value={itemId?.toString()}>
-                                        {itemId} - {item.name} | Rp. {item.cost}
+                                        {itemId} - {item.product_name} | Rp. {item.cost}
                                         </SelectItem>
                                     );
                                     })}

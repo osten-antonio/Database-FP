@@ -6,7 +6,7 @@ from typing import List
 router = APIRouter(prefix="/category", tags=["category"])
 
 @router.get("/", response_model=List[dict], responses={401: {"model": ErrorResponse}})
-async def get_all_categories(token: dict = Depends(verify_token)):
+async def get_all_categories():
     """Get all product categories"""
     try:
         result = get_categories()

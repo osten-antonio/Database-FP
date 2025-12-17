@@ -35,6 +35,8 @@ export default function Order() {
     const [rowSelection, setRowSelection] = useState({});
     const [addressDialogOpen, setAddressDialogOpen] = useState(false);
     const [selectedAddress, setSelectedAddress] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
+    const [errorDialogOpen, setErrorDialogOpen] = useState(false);
 
     const fetchOrders = async (query = '', appliedFilters = {}) => {
         try {
@@ -113,7 +115,6 @@ export default function Order() {
             
             const res = await api.get(endpoint);
             if (res.status >= 200 && res.status <= 300) {
-                console.log(res.data)
                 setOrders(res.data || []);
             }
         } catch (err) {
@@ -147,8 +148,8 @@ export default function Order() {
             await fetchOrders(searchQuery, filters);
             setCreateOpen(false);
         } catch (err) {
-
-            alert(err.response.data.detail);
+            setErrorMessage(err.response?.data?.detail || "Something went wrong");
+            setErrorDialogOpen(true);
         }
     };
 
@@ -283,6 +284,17 @@ export default function Order() {
     }
     return(
         <>
+            <Dialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Error</DialogTitle>
+                        <DialogDescription>{errorMessage}</DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button onClick={() => setErrorDialogOpen(false)}>Close</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
             <Dialog open={addressDialogOpen} onOpenChange={setAddressDialogOpen}>
                 <DialogContent>
                     <DialogHeader>

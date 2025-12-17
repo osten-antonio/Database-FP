@@ -7,7 +7,7 @@ from typing import List
 router = APIRouter(prefix="/supplier", tags=["supplier"])
 
 @router.get("/", response_model=List[dict], responses={401: {"model": ErrorResponse}})
-async def get_all_suppliers(token: dict = Depends(verify_token)):
+async def get_all_suppliers():
     """Get all suppliers"""
     result = get_suppliers()
     return result

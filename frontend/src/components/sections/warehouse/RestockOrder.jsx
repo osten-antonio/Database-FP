@@ -48,7 +48,6 @@ export const RestockOrderTable = forwardRef(function RestockOrderTable(props, re
     };
 
     const handleConfirmOrder = async () => {
-        console.log(selectedOrder)
         if (!selectedOrder) return;
 
         try {

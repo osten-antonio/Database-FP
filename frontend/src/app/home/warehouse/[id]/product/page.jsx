@@ -106,7 +106,6 @@ export default function WarehouseProducts(){
             (appliedFilters.categories?.length ?? 0) > 0
             if (hasActiveFilters) {
                 const params = new URLSearchParams();
-                console.log(appliedFilters)
                 if (appliedFilters.minCost) params.append('min_cost', appliedFilters.minCost);
                 if (appliedFilters.maxCost) params.append('max_cost', appliedFilters.maxCost);
                 if (appliedFilters.suppliers && appliedFilters.suppliers.length > 0) {
@@ -148,7 +147,6 @@ export default function WarehouseProducts(){
             }
             res = await api.get(endpoint);
             if (res.status >= 200 && res.status <= 300) {
-                console.log(res.data)
                 setProducts(res.data || []);
             }
         } catch (err) {
