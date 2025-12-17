@@ -239,7 +239,7 @@ export default function Order() {
                         }}>
                         Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => {
+                        <DropdownMenuItem onClick={(e) => {
                             e.stopPropagation()
                             setSelectedOrder(row.original);
                             setConfirmation(true);
