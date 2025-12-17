@@ -17,7 +17,8 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-
+import api from '@/lib/axios'
+import { useState, useEffect } from "react"
 const chartData = [
   { product: "Product 1", Quantity: 186 },
   { product: "Product 2", Quantity: 305 },
@@ -34,6 +35,23 @@ const chartConfig = {
 }
 
 export function TopProductChartRev() {
+
+  const [chartData,setChartData] = useState([]);
+
+  useEffect(()=>{
+    const getChartData = async ()=>{
+      try{
+        const res = await api.get('/dashboard/top-products-qty')
+        if(res.status >= 200 && res.status<=300){
+          console.log(res.data)
+          setChartData(res.data)
+        }
+      }catch(e){
+  
+      }
+    }
+    getChartData()
+  },[])
   return (
     <Card className='bg-card-grad shadow-md shadow-accent-dark border-primary-dark border-2 h-full'>
       <CardHeader className='flex gap-2 lg:gap-4 border-b flex-col'>

@@ -2,7 +2,7 @@
 
 import {useState} from "react"
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
-
+import { useEffect } from "react"
 import {
   Card,
   CardContent,
@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-
+import api from "@/lib/axios"
 
 const chartData = [
   { date: "2024-06-01", Sales: 178 },
@@ -69,6 +69,21 @@ const chartConfig = {
 
 export function TotalSales() {
   const [month, setMonth] = useState("month")
+  const [chartData,setChartData] = useState([]);
+
+  useEffect(()=>{
+    const getChartData = async ()=>{
+      try{
+        const res = await api.get('/dashboard/sales-by-month')
+        if(res.status >= 200 && res.status<=300){
+          setChartData(res.data)
+        }
+      }catch(e){
+  
+      }
+    }
+    getChartData()
+  },[])
 
   return (
     <Card className="pt-0 bg-card-grad shadow-md shadow-accent-dark border-primary-dark border-2 h-full">

@@ -17,7 +17,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-
+import { useState, useEffect } from "react"
+import api from "@/lib/axios"
 
 const chartData = [
   { warehouse: "January", Stock: 186 },
@@ -36,6 +37,24 @@ const chartConfig = {
 }
 
 export function StockLevels() {
+
+  const [chartData,setChartData] = useState([]);
+
+  useEffect(()=>{
+    const getChartData = async ()=>{
+      try{
+        const res = await api.get('/dashboard/warehouse-stocks')
+        if(res.status >= 200 && res.status<=300){
+          console.log(res.data)
+          setChartData(res.data)
+        }
+      }catch(e){
+  
+      }
+    }
+    getChartData()
+  },[])
+
   return (
     <Card className='bg-card-grad shadow-md shadow-accent-dark border-primary-dark border-2 h-full pt-0'>
       <CardHeader className='flex items-center border-b py-6 sm:flex-row'>
@@ -58,7 +77,7 @@ export function StockLevels() {
                 tickLine={false}
                 tickMargin={10}
                 axisLine={false}
-                tickFormatter={(value) => value.slice(0, 3)}
+                tickFormatter={(value) => value.slice(0, 5)}
                 tick={{ fill: "#352D60", style: { fill: "#352D60" } }}
             />
             <ChartTooltip

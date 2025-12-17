@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react"
+
 import {
   Table,
   TableBody,
@@ -9,9 +9,9 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import api from '@/lib/axios'
+import { useState, useEffect } from "react"
 
 export function RecentOrders(){
-    // TODO on click, redirect to order, prefilled with search using id
     const [orders, setOrders] = useState([]);
 
     useEffect(() => {
