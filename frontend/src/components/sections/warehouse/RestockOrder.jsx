@@ -162,10 +162,10 @@ export const RestockOrderTable = forwardRef(function RestockOrderTable(props, re
                                 Cancel
                             </Button>
                             <Button 
-                                className='shadow-sm bg-green-600 hover:bg-green-700'
+                                className='shadow-sm'
                                 onClick={handleConfirmOrder}
                             >
-                                Confirm & Move to Inventory
+                                Confirm
                             </Button>
                         </div>
                     </div>

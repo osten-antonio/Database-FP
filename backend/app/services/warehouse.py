@@ -7,7 +7,7 @@ def get_warehouse_specific(id):
         
         # Get warehouse info with manager details
         cursor.execute('''
-            SELECT w.warehouse_id, w.name, w.address, a.name as manager_name, a.email as manager_email
+            SELECT w.warehouse_id, w.name, w.address, a.name as manager_name, a.email as manager_email, a.phone_number as phone_num
             FROM Warehouse w
             LEFT JOIN Account a ON w.account_id = a.account_id
             WHERE w.warehouse_id = %s

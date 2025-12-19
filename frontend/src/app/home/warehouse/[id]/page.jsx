@@ -410,7 +410,7 @@ export default function InnerWarehouse(){
                             <CardDescription className="text-text-dark font-black text-xl flex flex-row gap-2 items-center"> <BookUser/> Manager</CardDescription>
                             <CardDescription className="text-text-dark/80 font-black">Managed by: {warehouseInfo.manager_name || '-'}</CardDescription>
                             <CardDescription className="text-text-dark/80 font-black">Email: {warehouseInfo.manager_email || '-'}</CardDescription>
-                            <CardDescription className="text-text-dark/80 font-black">Phone number: -</CardDescription>
+                            <CardDescription className="text-text-dark/80 font-black">Phone number: {warehouseInfo.phone_num}</CardDescription>
                             <CardDescription className="text-text-dark/80 font-black">Address: {warehouseInfo.address || '-'}</CardDescription>
                         </div>
                         <div className="bg-secondary w-full gap-3 flex flex-col flex-nowrap shadow-md shadow-accent-ui rounded-md p-4">

@@ -38,3 +38,18 @@ def login_user(email: str, password: str):
 
     return {'id':user["id"], 'username':user["username"], "role": user["role"], "access_token": token, "token_type": "bearer"}
 
+def create_user(email: str, name:str, password: str, role:int):
+    hashed = hash_password(password)
+    roles = ['supplier', 'manager', 'admin']
+
+    try:
+        conn = connect()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO Account (name,email,phone_number,password,account_type) VALUES (%s,%s,%s,%s,%s)", (name,email,"111111111111111",hashed,roles[role]))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+    return {'success':True}
