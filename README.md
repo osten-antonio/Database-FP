@@ -15,7 +15,7 @@ An Inventory and Supplier Management System provides a centralized platform for 
 - Restock
 - Customer & Address
 
-### ERD Diagram
+### Entity Relation Diagram
 <img width="1402" height="967" alt="image1" src="https://github.com/user-attachments/assets/36638a2d-807e-4588-a8d9-6e997ff7758a" />
 
 
